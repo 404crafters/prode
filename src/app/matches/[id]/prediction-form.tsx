@@ -1,0 +1,89 @@
+"use client";
+
+import { useActionState } from "react";
+import { saveMatchPredictionAction, type SavePredictionState } from "./actions";
+
+type PredictionFormProps = {
+  matchId: string;
+  stage: string;
+  homeTeam: { id: string; name: string } | null;
+  awayTeam: { id: string; name: string } | null;
+  defaultValue: {
+    homeGoals: number;
+    awayGoals: number;
+    predictedWinnerTeamId: string | null;
+  } | null;
+};
+
+const initialState: SavePredictionState = {};
+
+export function PredictionForm({
+  matchId,
+  stage,
+  homeTeam,
+  awayTeam,
+  defaultValue,
+}: PredictionFormProps) {
+  const [state, formAction, pending] = useActionState(saveMatchPredictionAction, initialState);
+  const isKnockout = stage !== "group";
+
+  return (
+    <form action={formAction} className="flex flex-col gap-4">
+      <input name="matchId" type="hidden" value={matchId} />
+
+      <div className="grid grid-cols-2 gap-3">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          {homeTeam?.name ?? "Local"}
+          <input
+            className="h-11 rounded-md border border-slate-300 px-3 text-base text-slate-950 outline-none focus:border-emerald-600"
+            defaultValue={defaultValue?.homeGoals ?? ""}
+            min={0}
+            name="homeGoals"
+            required
+            type="number"
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          {awayTeam?.name ?? "Visitante"}
+          <input
+            className="h-11 rounded-md border border-slate-300 px-3 text-base text-slate-950 outline-none focus:border-emerald-600"
+            defaultValue={defaultValue?.awayGoals ?? ""}
+            min={0}
+            name="awayGoals"
+            required
+            type="number"
+          />
+        </label>
+      </div>
+
+      {isKnockout ? (
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Ganador si hay empate
+          <select
+            className="h-11 rounded-md border border-slate-300 px-3 text-base text-slate-950 outline-none focus:border-emerald-600"
+            defaultValue={defaultValue?.predictedWinnerTeamId ?? ""}
+            name="predictedWinnerTeamId"
+          >
+            <option value="">Seleccionar solo si pronosticas empate</option>
+            {homeTeam ? <option value={homeTeam.id}>{homeTeam.name}</option> : null}
+            {awayTeam ? <option value={awayTeam.id}>{awayTeam.name}</option> : null}
+          </select>
+        </label>
+      ) : null}
+
+      {state.error ? <p className="text-sm font-medium text-red-700">{state.error}</p> : null}
+      {state.success ? (
+        <p className="text-sm font-medium text-emerald-700">{state.success}</p>
+      ) : null}
+
+      <button
+        className="h-11 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        disabled={pending}
+        type="submit"
+      >
+        {pending ? "Guardando..." : "Guardar pronostico"}
+      </button>
+    </form>
+  );
+}
