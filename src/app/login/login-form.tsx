@@ -10,7 +10,7 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="flex w-full flex-col gap-4">
-      <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+      <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
         Usuario
         <input
           className="field-control text-base"
@@ -20,7 +20,7 @@ export function LoginForm() {
         />
       </label>
 
-      <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+      <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
         Contrasena
         <input
           className="field-control text-base"

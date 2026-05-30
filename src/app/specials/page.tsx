@@ -30,7 +30,7 @@ export default async function SpecialsPage() {
 
         {result.ok && allInResult.ok ? (
           <div className="mt-6 flex flex-col gap-8">
-            <section className="rounded-lg border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-5 shadow-sm">
+            <section className="rounded-lg border border-emerald-500/25 bg-gradient-to-br from-emerald-950/70 via-slate-900 to-slate-950 p-5 shadow-lg shadow-black/25">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold">All-In</h3>
@@ -231,10 +231,40 @@ function SpecialResult({
   selected: string;
 }) {
   return (
-    <div className="mt-3 grid grid-cols-3 gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600">
-      <p><span className="font-semibold text-slate-900">Elegido:</span> {selected}</p>
-      <p><span className="font-semibold text-slate-900">Resultado:</span> {result}</p>
-      <p><span className="font-semibold text-slate-900">Puntos:</span> {points === null ? "Pendiente" : points}</p>
+    <div className="mt-3 grid grid-cols-3 gap-2">
+      <SpecialMetric label="Elegido" value={selected} />
+      <SpecialMetric label="Resultado" value={result} />
+      <div className="match-metric">
+        <span className="match-metric-label">Puntos</span>
+        <div className="mt-1.5">
+          <PointsChip points={points} />
+        </div>
+      </div>
     </div>
+  );
+}
+
+function SpecialMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="match-metric">
+      <span className="match-metric-label">{label}</span>
+      <span className="match-metric-value">{value}</span>
+    </div>
+  );
+}
+
+function PointsChip({ points }: { points: number | null }) {
+  return (
+    <span
+      className={
+        points === null
+          ? "points-chip points-pending"
+          : points > 0
+            ? "points-chip points-positive"
+            : "points-chip points-zero"
+      }
+    >
+      {points === null ? "Pend." : points}
+    </span>
   );
 }

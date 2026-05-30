@@ -176,7 +176,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                               ? "-"
                               : `${prediction.finalPoints} (${prediction.scoreLabel})`}
                             {prediction.isAllIn ? (
-                              <span className="pill pill-open ml-2">
+                              <span className="pill pill-all-in ml-2">
                                 All-In
                               </span>
                             ) : null}

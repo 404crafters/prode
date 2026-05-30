@@ -41,13 +41,17 @@ export default async function RankingPage() {
                         {row.displayName}
                       </Link>
                     </td>
-                    <td className="font-bold text-emerald-800">{row.totalPoints}</td>
-                    <td>{row.matchPoints}</td>
-                    <td className="text-slate-600">
-                      E {row.exactCount} / F {row.fullCount} / P {row.partialCount}
+                    <td><PointsChip points={row.totalPoints} /></td>
+                    <td><PointsChip points={row.matchPoints} /></td>
+                    <td>
+                      <div className="flex flex-wrap gap-1.5">
+                        <ScoreCountBadge className="score-exact" label="Exacto" value={row.exactCount} />
+                        <ScoreCountBadge className="score-full" label="Full" value={row.fullCount} />
+                        <ScoreCountBadge className="score-partial" label="Parcial" value={row.partialCount} />
+                      </div>
                     </td>
-                    <td>{row.allInBonusPoints}</td>
-                    <td>{row.specialPoints}</td>
+                    <td><PointsChip points={row.allInBonusPoints} /></td>
+                    <td><PointsChip points={row.specialPoints} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -57,6 +61,26 @@ export default async function RankingPage() {
       </section>
     </AppShell>
   );
+}
+
+function PointsChip({ points }: { points: number }) {
+  return (
+    <span className={points > 0 ? "points-chip points-positive" : "points-chip points-zero"}>
+      {points}
+    </span>
+  );
+}
+
+function ScoreCountBadge({
+  className,
+  label,
+  value,
+}: {
+  className: string;
+  label: string;
+  value: number;
+}) {
+  return <span className={`score-badge ${className}`}>{label} {value}</span>;
 }
 
 async function getRankingSafely() {

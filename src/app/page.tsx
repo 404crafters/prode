@@ -116,8 +116,14 @@ export default async function Home() {
                 >
                   <span className="pill bg-slate-950 text-white">#{row.position}</span>
                   <p className="mt-3 font-semibold">{row.displayName}</p>
-                  <p className="mt-1 text-2xl font-bold text-emerald-800">{row.totalPoints}</p>
-                  <p className="text-xs font-medium text-slate-500">puntos</p>
+                  <div className="mt-3">
+                    <PointsChip points={row.totalPoints} />
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    <ScoreCountBadge className="score-exact" label="E" value={row.exactCount} />
+                    <ScoreCountBadge className="score-full" label="F" value={row.fullCount} />
+                    <ScoreCountBadge className="score-partial" label="P" value={row.partialCount} />
+                  </div>
                 </Link>
               ))}
             </div>
@@ -136,6 +142,22 @@ async function getSummarySafely() {
   } catch (error) {
     return { ok: false as const, error };
   }
+}
+
+function PointsChip({ points }: { points: number }) {
+  return <span className="points-chip points-positive">{points} pts</span>;
+}
+
+function ScoreCountBadge({
+  className,
+  label,
+  value,
+}: {
+  className: string;
+  label: string;
+  value: number;
+}) {
+  return <span className={`score-badge ${className}`}>{label} {value}</span>;
 }
 
 async function getRankingSafely() {

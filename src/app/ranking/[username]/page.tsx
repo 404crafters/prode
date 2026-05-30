@@ -66,7 +66,7 @@ export default async function RankingDetailPage({
                         <td className="font-medium">
                           {match.label}
                           {match.isAllIn ? (
-                            <span className="pill pill-open ml-2">
+                            <span className="pill pill-all-in ml-2">
                               All-In
                             </span>
                           ) : null}
@@ -74,9 +74,9 @@ export default async function RankingDetailPage({
                         <td className="text-slate-600">{match.kickoffLabel}</td>
                         <td>{match.predictionLabel}</td>
                         <td>{match.resultLabel}</td>
-                        <td>{match.scoreLabel}</td>
+                        <td><ScoreBadge label={match.scoreLabel} /></td>
                         <td className="font-semibold">
-                          {match.finalPoints}
+                          <PointsChip points={match.finalPoints} />
                           {match.isAllIn ? (
                             <span className="ml-2 text-xs font-medium text-slate-500">
                               base {match.basePoints}
@@ -115,7 +115,7 @@ export default async function RankingDetailPage({
                         <td className="font-medium">{special.label}</td>
                         <td>{special.predictionLabel}</td>
                         <td>{special.resultLabel}</td>
-                        <td className="font-semibold">{special.points}</td>
+                        <td className="font-semibold"><PointsChip points={special.points} /></td>
                       </tr>
                     ))}
                     {detail.specials.length === 0 ? (
@@ -142,6 +142,50 @@ function StatPill({ label, value }: { label: string; value: number }) {
       {label}: {value}
     </span>
   );
+}
+
+function PointsChip({ points }: { points: number | null }) {
+  return (
+    <span
+      className={
+        points === null
+          ? "points-chip points-pending"
+          : points > 0
+            ? "points-chip points-positive"
+            : "points-chip points-zero"
+      }
+    >
+      {points === null ? "-" : points}
+    </span>
+  );
+}
+
+function ScoreBadge({ label }: { label: string }) {
+  return <span className={`score-badge ${getScoreBadgeClass(label)}`}>{getScoreBadgeLabel(label)}</span>;
+}
+
+function getScoreBadgeClass(label: string) {
+  if (label === "Exacto") {
+    return "score-exact";
+  }
+
+  if (label === "Signo" || label === "Ganador") {
+    return "score-full";
+  }
+
+  if (label === "Parcial") {
+    return "score-partial";
+  }
+
+  if (label === "Incorrecto" || label === "Sin pronostico") {
+    return "score-miss";
+  }
+
+  return "score-pending";
+}
+
+function getScoreBadgeLabel(label: string) {
+  return label === "Sin pronostico" ? "-" : label;
 }
 
 async function getRankingDetailSafely(username: string) {

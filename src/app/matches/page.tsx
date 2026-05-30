@@ -170,9 +170,16 @@ function MatchCard({ compact = false, match }: { compact?: boolean; match: Match
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-medium text-slate-950">
-            {match.homeTeamName ?? "TBD"} vs {match.awayTeamName ?? "TBD"}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-medium text-slate-950">
+              {match.homeTeamName ?? "TBD"} vs {match.awayTeamName ?? "TBD"}
+            </p>
+            {match.isAllIn ? (
+              <span className="pill pill-all-in">
+                All-In
+              </span>
+            ) : null}
+          </div>
           <p className="mt-1 text-xs text-slate-500">{match.kickoffLabel}</p>
         </div>
         <span
@@ -185,21 +192,75 @@ function MatchCard({ compact = false, match }: { compact?: boolean; match: Match
           {match.isPredictionOpen ? "Abierta" : "Cerrada"}
         </span>
       </div>
-      <div className={compact ? "mt-2 text-xs text-slate-600" : "mt-3 grid grid-cols-3 gap-2 text-xs text-slate-600"}>
-        <p>Pronostico: {match.predictionLabel ?? "-"}</p>
-        <p>
-          Resultado:{" "}
-          {match.homeGoals === null || match.awayGoals === null ? "-" : `${match.homeGoals} - ${match.awayGoals}`}
-        </p>
-        <p>Puntos: {match.points === null ? "-" : `${match.points} (${match.scoreLabel})`}</p>
+      <div className={compact ? "mt-3 flex flex-col gap-2" : "mt-3 grid grid-cols-3 gap-2"}>
+        <MatchMetric label="Pronostico" value={match.predictionLabel ?? "-"} />
+        <MatchMetric
+          label="Resultado"
+          value={match.homeGoals === null || match.awayGoals === null ? "-" : `${match.homeGoals} - ${match.awayGoals}`}
+        />
+        <div className="match-metric">
+          <span className="match-metric-label">Puntos</span>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <PointsChip points={match.points} />
+            {match.scoreLabel ? <ScoreBadge label={match.scoreLabel} /> : null}
+          </div>
+        </div>
       </div>
-      {match.isAllIn ? (
-        <span className="mt-2 inline-flex rounded-md bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">
-          All-In
-        </span>
-      ) : null}
     </Link>
   );
+}
+
+function MatchMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="match-metric">
+      <span className="match-metric-label">{label}</span>
+      <span className="match-metric-value">{value}</span>
+    </div>
+  );
+}
+
+function PointsChip({ points }: { points: number | null }) {
+  return (
+    <span
+      className={
+        points === null
+          ? "points-chip points-pending"
+          : points > 0
+            ? "points-chip points-positive"
+            : "points-chip points-zero"
+      }
+    >
+      {points === null ? "-" : points}
+    </span>
+  );
+}
+
+function ScoreBadge({ label }: { label: string }) {
+  return <span className={`score-badge ${getScoreBadgeClass(label)}`}>{getScoreBadgeLabel(label)}</span>;
+}
+
+function getScoreBadgeClass(label: string) {
+  if (label === "Exacto") {
+    return "score-exact";
+  }
+
+  if (label === "Signo" || label === "Ganador") {
+    return "score-full";
+  }
+
+  if (label === "Parcial") {
+    return "score-partial";
+  }
+
+  if (label === "Incorrecto" || label === "Sin pronostico") {
+    return "score-miss";
+  }
+
+  return "score-pending";
+}
+
+function getScoreBadgeLabel(label: string) {
+  return label === "Sin pronostico" ? "-" : label;
 }
 
 function parseFilter(value: string | undefined): MatchFilter {

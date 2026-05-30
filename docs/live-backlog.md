@@ -126,6 +126,10 @@ Ultima actualizacion: 2026-05-30
   - home con ranking en tarjetas
   - fixture con tarjetas mas destacadas por grupo/instancia
   - formularios de login, pronosticos, All-In y especiales alineados al nuevo estilo
+- Dark mode fijo aplicado a todo el sitio:
+  - fondo, superficies y tarjetas oscuras
+  - textos, bordes, tablas e inputs ajustados para contraste
+  - overrides globales para evitar restos de light mode en utilities existentes
 - Verificaciones actuales:
   - `npm test`
   - `npm run lint`

@@ -25,11 +25,11 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="app-bg min-h-screen text-slate-950">
+    <main className="app-bg min-h-screen text-slate-100">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-7 px-8 py-8">
         <header className="surface flex items-center justify-between rounded-lg px-5 py-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-950 text-lg font-black text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500 text-lg font-black text-slate-950 shadow-lg shadow-emerald-950/30">
               404
             </div>
             <div>
@@ -39,7 +39,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm">
+            <span className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-200 shadow-sm">
               {user.displayName}
             </span>
             <Link
@@ -56,7 +56,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             .filter((item) => !item.adminOnly || user.role === "admin")
             .map((item) => (
               <Link
-                className="rounded-md border border-white/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm shadow-slate-200/60 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-900"
+                className="rounded-md border border-slate-700 bg-slate-900/85 px-3 py-2 text-sm font-semibold text-slate-200 shadow-sm hover:border-emerald-400 hover:bg-emerald-950/70 hover:text-emerald-100"
                 href={item.href}
                 key={item.href}
               >
