@@ -16,42 +16,67 @@ export type MatchPrediction = {
 };
 
 export type MatchPoints = 0 | 1 | 3 | 5;
+export type MatchScoreKind = "missing" | "exact" | "full" | "partial" | "miss" | "pending";
+
+export type MatchScoreBreakdown = {
+  points: MatchPoints;
+  kind: MatchScoreKind;
+  label: string;
+};
 
 export function scoreGroupMatchPrediction(
   result: MatchResult,
   prediction: MatchPrediction | null,
 ): MatchPoints {
+  return getGroupMatchScoreBreakdown(result, prediction).points;
+}
+
+export function getGroupMatchScoreBreakdown(
+  result: MatchResult,
+  prediction: MatchPrediction | null,
+): MatchScoreBreakdown {
   if (!prediction) {
-    return 0;
+    return { points: 0, kind: "missing", label: "Sin pronostico" };
   }
 
   const exactScore =
     result.homeGoals === prediction.homeGoals && result.awayGoals === prediction.awayGoals;
 
   if (exactScore) {
-    return 5;
+    return { points: 5, kind: "exact", label: "Exacto" };
   }
 
   const resultSign = getSign(result.homeGoals, result.awayGoals);
   const predictionSign = getSign(prediction.homeGoals, prediction.awayGoals);
 
   if (resultSign === predictionSign) {
-    return 3;
+    return { points: 3, kind: "full", label: "Signo" };
   }
 
   if (resultSign === "draw" || predictionSign === "draw") {
-    return 1;
+    return { points: 1, kind: "partial", label: "Parcial" };
   }
 
-  return 0;
+  return { points: 0, kind: "miss", label: "Incorrecto" };
 }
 
 export function scoreKnockoutMatchPrediction(
   result: MatchResult,
   prediction: MatchPrediction | null,
 ): MatchPoints {
-  if (!prediction || !result.winnerTeamId) {
-    return 0;
+  return getKnockoutMatchScoreBreakdown(result, prediction).points;
+}
+
+export function getKnockoutMatchScoreBreakdown(
+  result: MatchResult,
+  prediction: MatchPrediction | null,
+): MatchScoreBreakdown {
+  if (!prediction) {
+    return { points: 0, kind: "missing", label: "Sin pronostico" };
+  }
+
+  if (!result.winnerTeamId) {
+    return { points: 0, kind: "pending", label: "Pendiente" };
   }
 
   const predictedWinnerTeamId = getPredictedWinnerTeamId(result, prediction);
@@ -60,18 +85,18 @@ export function scoreKnockoutMatchPrediction(
   const exactWinner = predictedWinnerTeamId === result.winnerTeamId;
 
   if (exactScore && exactWinner) {
-    return 5;
+    return { points: 5, kind: "exact", label: "Exacto" };
   }
 
   if (exactWinner) {
-    return 3;
+    return { points: 3, kind: "full", label: "Ganador" };
   }
 
   if (exactScore) {
-    return 1;
+    return { points: 1, kind: "partial", label: "Parcial" };
   }
 
-  return 0;
+  return { points: 0, kind: "miss", label: "Incorrecto" };
 }
 
 export function applyAllIn(basePoints: MatchPoints, isAllIn: boolean): number {

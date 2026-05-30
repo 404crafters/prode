@@ -1,4 +1,5 @@
-import { db } from "@/db/client";
+import { config } from "dotenv";
+import { closeDbConnection, db } from "@/db/client";
 import {
   groupTeams,
   groups,
@@ -12,6 +13,8 @@ import {
   type Match,
   type Team,
 } from "@/db/schema";
+
+config({ path: ".env.local", override: true });
 
 const scenarios = [
   "pre-worldcup",
@@ -441,7 +444,12 @@ function isAtLeast(scenario: ScenarioName, checkpoint: ScenarioName): boolean {
   return scenarios.indexOf(scenario) >= scenarios.indexOf(checkpoint);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .then(async () => {
+    await closeDbConnection();
+  })
+  .catch(async (error) => {
+    console.error(error);
+    await closeDbConnection();
+    process.exit(1);
+  });

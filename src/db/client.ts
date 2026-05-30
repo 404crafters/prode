@@ -12,6 +12,7 @@ function getPostgresClient(): postgres.Sql {
     globalForDb.postgresClient ??
     postgres(requireEnv("DATABASE_URL"), {
       prepare: false,
+      ssl: "require",
     });
 
   if (process.env.NODE_ENV !== "production") {
@@ -19,6 +20,13 @@ function getPostgresClient(): postgres.Sql {
   }
 
   return client;
+}
+
+export async function closeDbConnection() {
+  if (globalForDb.postgresClient) {
+    await globalForDb.postgresClient.end();
+    globalForDb.postgresClient = undefined;
+  }
 }
 
 export function getDb() {

@@ -200,3 +200,6 @@ export type Team = typeof teams.$inferSelect;
 export type Group = typeof groups.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type MatchPredictionRecord = typeof matchPredictions.$inferSelect;
+export type MatchStage = (typeof matchStageEnum.enumValues)[number];
+export type MatchStatus = (typeof matchStatusEnum.enumValues)[number];
+export type SyncRunType = (typeof syncRunTypeEnum.enumValues)[number];

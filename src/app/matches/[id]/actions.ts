@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/client";
-import { matchPredictions } from "@/db/schema";
+import { matches, matchPredictions, userAllIns } from "@/db/schema";
 import { getPredictionMatch } from "@/db/queries/match-detail";
 import { isMatchPredictionOpen } from "@/domain/deadlines";
 import { normalizePredictedWinner, validateMatchPredictionInput } from "@/domain/predictions";
@@ -23,9 +24,11 @@ const formSchema = z.object({
 });
 
 export async function saveMatchPredictionAction(
-  _state: SavePredictionState,
+  state: SavePredictionState,
   formData: FormData,
 ): Promise<SavePredictionState> {
+  void state;
+
   const user = await getCurrentUser();
 
   if (!user) {
@@ -88,4 +91,57 @@ export async function saveMatchPredictionAction(
   revalidatePath("/matches");
 
   return { success: "Pronostico guardado." };
+}
+
+export async function setAllInAction(formData: FormData) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return;
+  }
+
+  const matchId = String(formData.get("matchId") ?? "");
+  const match = await getPredictionMatch(matchId);
+
+  if (!match || !isMatchPredictionOpen(match, getNow())) {
+    revalidatePath(`/matches/${matchId}`);
+    return;
+  }
+
+  const [currentAllIn] = await db
+    .select()
+    .from(userAllIns)
+    .where(eq(userAllIns.username, user.username))
+    .limit(1);
+
+  if (currentAllIn) {
+    const [currentMatch] = await db
+      .select()
+      .from(matches)
+      .where(eq(matches.id, currentAllIn.matchId))
+      .limit(1);
+
+    if (currentMatch && !isMatchPredictionOpen(currentMatch, getNow())) {
+      revalidatePath(`/matches/${matchId}`);
+      return;
+    }
+  }
+
+  await db
+    .insert(userAllIns)
+    .values({
+      username: user.username,
+      matchId: match.id,
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: userAllIns.username,
+      set: {
+        matchId: match.id,
+        updatedAt: new Date(),
+      },
+    });
+
+  revalidatePath(`/matches/${match.id}`);
+  revalidatePath("/matches");
 }

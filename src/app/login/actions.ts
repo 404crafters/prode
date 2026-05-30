@@ -13,7 +13,9 @@ export type LoginState = {
   error?: string;
 };
 
-export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
+export async function loginAction(state: LoginState, formData: FormData): Promise<LoginState> {
+  void state;
+
   const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const user = findUser(username);

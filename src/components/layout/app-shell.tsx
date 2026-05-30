@@ -12,6 +12,8 @@ const navItems: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/matches", label: "Partidos" },
   { href: "/groups", label: "Grupos" },
+  { href: "/specials", label: "Especiales" },
+  { href: "/ranking", label: "Ranking" },
   { href: "/admin", label: "Admin", adminOnly: true },
 ];
 
@@ -23,12 +25,12 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#d1fae5,transparent_32rem),linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-950">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-8 py-8">
-        <header className="flex items-center justify-between border-b border-slate-200 pb-5">
+        <header className="flex items-center justify-between rounded-lg border border-white/70 bg-white/80 px-5 py-4 shadow-sm shadow-slate-200/70 backdrop-blur">
           <div>
             <p className="text-sm font-medium text-emerald-700">Mundial 2026</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-normal">Prode de la oficina</h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-normal">Prode de 404</h1>
           </div>
 
           <div className="flex items-center gap-3">
@@ -44,12 +46,12 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <nav className="flex gap-2">
+        <nav className="flex flex-wrap gap-2">
           {navItems
             .filter((item) => !item.adminOnly || user.role === "admin")
             .map((item) => (
               <Link
-                className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:border-emerald-300 hover:text-emerald-800"
+                className="rounded-md border border-white/80 bg-white/85 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm shadow-slate-200/60 hover:border-emerald-300 hover:text-emerald-800"
                 href={item.href}
                 key={item.href}
               >

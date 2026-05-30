@@ -18,7 +18,8 @@
     "db:seed:group-stage-finished": "tsx src/db/seeds/run.ts group-stage-finished",
     "db:seed:knockouts-start": "tsx src/db/seeds/run.ts knockouts-start",
     "db:seed:knockouts-mid": "tsx src/db/seeds/run.ts knockouts-mid",
-    "db:seed:finished-worldcup": "tsx src/db/seeds/run.ts finished-worldcup"
+    "db:seed:finished-worldcup": "tsx src/db/seeds/run.ts finished-worldcup",
+    "sync:api-football": "tsx src/integrations/api-football/run-sync.ts"
   },
   "dependencies": {
     "date-fns": "^4.3.0",
@@ -36,6 +37,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",

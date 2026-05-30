@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useActionState } from "react";
 import { saveMatchPredictionAction, type SavePredictionState } from "./actions";
 
@@ -25,7 +26,16 @@ export function PredictionForm({
   defaultValue,
 }: PredictionFormProps) {
   const [state, formAction, pending] = useActionState(saveMatchPredictionAction, initialState);
+  const [homeGoals, setHomeGoals] = useState(defaultValue?.homeGoals?.toString() ?? "");
+  const [awayGoals, setAwayGoals] = useState(defaultValue?.awayGoals?.toString() ?? "");
   const isKnockout = stage !== "group";
+  const needsPenaltyWinner = useMemo(() => {
+    if (!isKnockout || homeGoals === "" || awayGoals === "") {
+      return false;
+    }
+
+    return Number(homeGoals) === Number(awayGoals);
+  }, [awayGoals, homeGoals, isKnockout]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -36,11 +46,12 @@ export function PredictionForm({
           {homeTeam?.name ?? "Local"}
           <input
             className="h-11 rounded-md border border-slate-300 px-3 text-base text-slate-950 outline-none focus:border-emerald-600"
-            defaultValue={defaultValue?.homeGoals ?? ""}
             min={0}
             name="homeGoals"
+            onChange={(event) => setHomeGoals(event.target.value)}
             required
             type="number"
+            value={homeGoals}
           />
         </label>
 
@@ -48,28 +59,34 @@ export function PredictionForm({
           {awayTeam?.name ?? "Visitante"}
           <input
             className="h-11 rounded-md border border-slate-300 px-3 text-base text-slate-950 outline-none focus:border-emerald-600"
-            defaultValue={defaultValue?.awayGoals ?? ""}
             min={0}
             name="awayGoals"
+            onChange={(event) => setAwayGoals(event.target.value)}
             required
             type="number"
+            value={awayGoals}
           />
         </label>
       </div>
 
-      {isKnockout ? (
+      {isKnockout && needsPenaltyWinner ? (
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Ganador si hay empate
+          Ganador por penales
           <select
             className="h-11 rounded-md border border-slate-300 px-3 text-base text-slate-950 outline-none focus:border-emerald-600"
             defaultValue={defaultValue?.predictedWinnerTeamId ?? ""}
             name="predictedWinnerTeamId"
+            required
           >
-            <option value="">Seleccionar solo si pronosticas empate</option>
+            <option value="">Seleccionar ganador</option>
             {homeTeam ? <option value={homeTeam.id}>{homeTeam.name}</option> : null}
             {awayTeam ? <option value={awayTeam.id}>{awayTeam.name}</option> : null}
           </select>
         </label>
+      ) : null}
+
+      {isKnockout && !needsPenaltyWinner ? (
+        <input name="predictedWinnerTeamId" type="hidden" value="" />
       ) : null}
 
       {state.error ? <p className="text-sm font-medium text-red-700">{state.error}</p> : null}

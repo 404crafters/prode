@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prode Mundial 2026",
-  description: "Prode interno para el Mundial de Futbol 2026",
+  title: "Prode de 404",
+  description: "Prode de 404 para el Mundial de Futbol 2026",
 };
 
 export default function RootLayout({

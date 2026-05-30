@@ -6,6 +6,8 @@ const envSchema = z.object({
   CRON_SECRET: z.string().min(1).optional(),
   API_FOOTBALL_KEY: z.string().min(1).optional(),
   API_FOOTBALL_BASE_URL: z.string().url().default("https://v3.football.api-sports.io"),
+  API_FOOTBALL_LEAGUE_ID: z.coerce.number().int().positive().default(1),
+  API_FOOTBALL_SEASON: z.coerce.number().int().positive().default(2026),
   SIMULATION_MODE: z
     .enum(["true", "false"])
     .default("false")
