@@ -32,14 +32,14 @@ export default async function MatchesPage({
 
   return (
     <AppShell>
-      <section className="rounded-lg border border-white/80 bg-white/90 p-6 shadow-sm shadow-slate-200/70">
+      <section className="surface rounded-lg p-6">
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-sm font-medium text-emerald-700">Fixture</p>
-            <h2 className="mt-1 text-2xl font-semibold">Partidos</h2>
+            <p className="eyebrow">Fixture</p>
+            <h2 className="mt-1 text-3xl font-semibold">Partidos</h2>
             {contextLabel ? <p className="mt-2 text-sm text-slate-500">{contextLabel}</p> : null}
           </div>
-          {result.ok ? <p className="text-sm text-slate-500">{visibleMatches.length} partidos</p> : null}
+          {result.ok ? <p className="pill bg-white text-slate-700">{visibleMatches.length} partidos</p> : null}
         </div>
 
         {!result.ok ? <div className="mt-5"><SetupWarning error={result.error} /></div> : null}
@@ -51,8 +51,8 @@ export default async function MatchesPage({
                 <Link
                   className={
                     item.value === filter
-                      ? "rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white"
-                      : "rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:border-emerald-300"
+                      ? "rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-sm"
+                      : "rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:border-emerald-300 hover:bg-emerald-50"
                   }
                   href={buildMatchesHref({ ...params, filter: item.value === "all" ? undefined : item.value })}
                   key={item.value}
@@ -62,7 +62,7 @@ export default async function MatchesPage({
               ))}
               {params.group || params.team ? (
                 <Link
-                  className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900 hover:bg-amber-100"
+                  className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100"
                   href={buildMatchesHref({ filter: params.filter })}
                 >
                   Limpiar grupo/equipo
@@ -111,13 +111,13 @@ function MatchSection({
 
   return (
     <section>
-      <h3 className="text-lg font-semibold">{title}</h3>
+      <h3 className="text-xl font-semibold">{title}</h3>
       {matches.length > 0 ? (
         <div className="mt-3 grid grid-cols-2 gap-3">
           {[...groups.entries()].map(([groupCode, groupMatches]) => (
-            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={groupCode}>
+            <div className="soft-card rounded-lg p-4" key={groupCode}>
               <Link
-                className="text-sm font-semibold text-emerald-800 hover:text-emerald-900"
+                className="inline-flex rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-800"
                 href={groupCode === "Sin grupo" ? "/matches" : `/matches?group=${groupCode}`}
               >
                 {groupCode === "Sin grupo" ? groupCode : `Grupo ${groupCode}`}
@@ -141,12 +141,12 @@ function KnockoutSection({ matches }: { matches: MatchListItem[] }) {
 
   return (
     <section>
-      <h3 className="text-lg font-semibold">Fase eliminatoria</h3>
+      <h3 className="text-xl font-semibold">Fase eliminatoria</h3>
       {matches.length > 0 ? (
         <div className="mt-3 grid grid-cols-3 gap-3">
           {orderedStages.map((stage) => (
-            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={stage}>
-              <p className="text-sm font-semibold text-slate-950">{getStageLabel(stage)}</p>
+            <div className="soft-card rounded-lg p-4" key={stage}>
+              <p className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white">{getStageLabel(stage)}</p>
               <div className="mt-3 flex flex-col gap-2">
                 {(byStage.get(stage) ?? []).map((match) => <MatchCard key={match.id} match={match} compact />)}
               </div>
@@ -165,7 +165,7 @@ function KnockoutSection({ matches }: { matches: MatchListItem[] }) {
 function MatchCard({ compact = false, match }: { compact?: boolean; match: MatchListItem }) {
   return (
     <Link
-      className="block rounded-md border border-slate-100 bg-slate-50 px-3 py-2 hover:border-emerald-200 hover:bg-emerald-50"
+      className="soft-card-link block rounded-md px-3 py-3"
       href={`/matches/${match.id}`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -178,8 +178,8 @@ function MatchCard({ compact = false, match }: { compact?: boolean; match: Match
         <span
           className={
             match.isPredictionOpen
-              ? "rounded-md bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
-              : "rounded-md bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700"
+              ? "pill pill-open"
+              : "pill pill-closed"
           }
         >
           {match.isPredictionOpen ? "Abierta" : "Cerrada"}

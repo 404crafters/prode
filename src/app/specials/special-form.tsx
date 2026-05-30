@@ -29,7 +29,7 @@ export function SpecialForm({
       <input name="type" type="hidden" value={type} />
       <input name="groupId" type="hidden" value={groupId ?? ""} />
       <select
-        className="h-10 min-w-56 rounded-md border border-slate-300 px-3 text-sm text-slate-950 outline-none focus:border-emerald-600 disabled:bg-slate-100"
+        className="field-control min-w-56 text-sm"
         defaultValue={defaultTeamId ?? ""}
         disabled={disabled}
         name="teamId"
@@ -43,7 +43,7 @@ export function SpecialForm({
         ))}
       </select>
       <button
-        className="h-10 rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="primary-button h-10 px-3"
         disabled={disabled || pending}
         type="submit"
       >

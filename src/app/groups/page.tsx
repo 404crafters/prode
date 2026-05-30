@@ -10,10 +10,10 @@ export default async function GroupsPage() {
 
   return (
     <AppShell>
-      <section className="rounded-lg border border-white/80 bg-white/90 p-6 shadow-sm shadow-slate-200/70">
+      <section className="surface rounded-lg p-6">
         <div>
-          <p className="text-sm font-medium text-emerald-700">Fase de grupos</p>
-          <h2 className="mt-1 text-2xl font-semibold">Grupos</h2>
+          <p className="eyebrow">Fase de grupos</p>
+          <h2 className="mt-1 text-3xl font-semibold">Grupos</h2>
         </div>
 
         {!result.ok ? <div className="mt-5"><SetupWarning error={result.error} /></div> : null}
@@ -21,9 +21,9 @@ export default async function GroupsPage() {
         {result.ok ? (
           <div className="mt-6 grid grid-cols-3 gap-4">
             {result.value.map((group) => (
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={group.id}>
+              <article className="soft-card rounded-lg p-4" key={group.id}>
                 <Link
-                  className="inline-flex items-center rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-800"
+                  className="inline-flex items-center rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
                   href={`/matches?group=${group.code}`}
                 >
                   Grupo {group.code}
@@ -31,12 +31,12 @@ export default async function GroupsPage() {
                 <div className="mt-3 flex flex-col gap-2">
                   {group.teams.map((team) => (
                     <Link
-                      className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 hover:bg-emerald-50"
+                      className="soft-card-link flex items-center justify-between rounded-md px-3 py-2"
                       href={`/matches?team=${team.id}`}
                       key={team.id}
                     >
                       <span className="font-medium">{team.name}</span>
-                      <span className="text-sm text-slate-500">
+                      <span className="pill bg-slate-100 text-slate-600">
                         {team.standing
                           ? `#${team.standing.rank} - ${team.standing.points ?? 0} pts`
                           : team.seed

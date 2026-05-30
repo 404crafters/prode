@@ -27,7 +27,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
 
   return (
     <AppShell>
-      <section className="rounded-lg border border-white/80 bg-white/90 p-6 shadow-sm shadow-slate-200/70">
+      <section className="surface rounded-lg p-6">
         <Link className="text-sm font-medium text-emerald-700" href="/matches">
           Volver a partidos
         </Link>
@@ -37,10 +37,10 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
         {match ? (
           <div className="mt-5 flex flex-col gap-6">
             <div>
-              <p className="text-sm font-medium text-emerald-700">
+              <p className="eyebrow">
                 {match.roundName ?? match.stage}
               </p>
-              <h2 className="mt-1 text-2xl font-semibold">
+              <h2 className="mt-1 text-3xl font-semibold">
                 {match.homeTeam?.name ?? "TBD"} vs {match.awayTeam?.name ?? "TBD"}
               </h2>
               <p className="mt-2 text-sm text-slate-500">
@@ -49,7 +49,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="soft-card rounded-lg p-5">
                 <h3 className="text-lg font-semibold">Mi pronostico</h3>
                 <div className="mt-4">
                   {match.isPredictionOpen && match.homeTeam && match.awayTeam ? (
@@ -102,7 +102,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                 </div>
               </div>
 
-              <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="soft-card rounded-lg p-5">
                 <h3 className="text-lg font-semibold">All-In</h3>
                 <p className="mt-4 text-sm text-slate-600">
                   {match.isAllIn
@@ -115,7 +115,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                   <form action={setAllInAction} className="mt-4">
                     <input name="matchId" type="hidden" value={match.id} />
                     <button
-                      className="h-10 rounded-md bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800"
+                      className="primary-button h-10"
                       type="submit"
                     >
                       Marcar All-In
@@ -125,7 +125,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="soft-card rounded-lg p-5">
               <h3 className="text-lg font-semibold">Resultado</h3>
               <div className="mt-4 flex flex-col gap-2 text-sm text-slate-600">
                 <p>
@@ -142,7 +142,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="soft-card rounded-lg p-5">
               <h3 className="text-lg font-semibold">Pronosticos del resto</h3>
               {!match.arePredictionsVisible ? (
                 <p className="mt-3 text-sm text-slate-600">
@@ -150,33 +150,33 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                 </p>
               ) : (
                 <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
-                  <table className="w-full border-collapse text-left text-sm">
-                    <thead className="bg-slate-100 text-slate-600">
+                  <table className="data-table">
+                    <thead>
                       <tr>
-                        <th className="px-3 py-2 font-medium">Usuario</th>
-                        <th className="px-3 py-2 font-medium">Pronostico</th>
-                        <th className="px-3 py-2 font-medium">Ganador penales</th>
-                        <th className="px-3 py-2 font-medium">Puntos</th>
+                        <th>Usuario</th>
+                        <th>Pronostico</th>
+                        <th>Ganador penales</th>
+                        <th>Puntos</th>
                       </tr>
                     </thead>
                     <tbody>
                       {match.visiblePredictions.map((prediction) => (
-                        <tr className="border-t border-slate-200" key={prediction.username}>
-                          <td className="px-3 py-2 font-medium">{prediction.displayName}</td>
-                          <td className="px-3 py-2">
+                        <tr key={prediction.username}>
+                          <td className="font-medium">{prediction.displayName}</td>
+                          <td>
                             {prediction.homeGoals === null || prediction.awayGoals === null
                               ? "-"
                               : `${prediction.homeGoals} - ${prediction.awayGoals}`}
                           </td>
-                          <td className="px-3 py-2 text-slate-600">
+                          <td className="text-slate-600">
                             {prediction.predictedWinnerTeamName ?? "-"}
                           </td>
-                          <td className="px-3 py-2 font-semibold">
+                          <td className="font-semibold">
                             {prediction.finalPoints === null
                               ? "-"
                               : `${prediction.finalPoints} (${prediction.scoreLabel})`}
                             {prediction.isAllIn ? (
-                              <span className="ml-2 rounded-md bg-emerald-50 px-2 py-1 text-xs text-emerald-700">
+                              <span className="pill pill-open ml-2">
                                 All-In
                               </span>
                             ) : null}

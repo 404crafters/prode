@@ -20,10 +20,10 @@ export default async function AdminPage() {
 
   return (
     <AppShell>
-      <section className="rounded-lg border border-white/80 bg-white/90 p-6 shadow-sm shadow-slate-200/70">
+      <section className="surface rounded-lg p-6">
         <div>
-          <p className="text-sm font-medium text-emerald-700">Operacion</p>
-          <h2 className="mt-1 text-2xl font-semibold">Admin</h2>
+          <p className="eyebrow">Operacion</p>
+          <h2 className="mt-1 text-3xl font-semibold">Admin</h2>
         </div>
 
         <div className="mt-5">
@@ -36,21 +36,21 @@ export default async function AdminPage() {
           <div className="mt-6 flex flex-col gap-6">
             <div className="grid grid-cols-4 gap-3">
               {Object.entries(result.value.counts).map(([label, value]) => (
-                <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={label}>
+                <div className="metric-card rounded-lg p-4" key={label}>
                   <p className="text-sm text-slate-500">{getCountLabel(label)}</p>
-                  <p className="mt-2 text-2xl font-semibold">{value}</p>
+                  <p className="mt-2 text-3xl font-bold">{value}</p>
                 </div>
               ))}
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="soft-card rounded-lg p-5">
               <h3 className="text-lg font-semibold">Simulacion</h3>
               <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-md bg-slate-50 px-3 py-2">
+                <div className="rounded-md border border-slate-100 bg-slate-50 px-3 py-2">
                   <p className="text-slate-500">SIMULATION_MODE</p>
                   <p className="mt-1 font-semibold">{env.SIMULATION_MODE ? "true" : "false"}</p>
                 </div>
-                <div className="rounded-md bg-slate-50 px-3 py-2">
+                <div className="rounded-md border border-slate-100 bg-slate-50 px-3 py-2">
                   <p className="text-slate-500">SIMULATION_NOW</p>
                   <p className="mt-1 font-semibold">{env.SIMULATION_NOW ?? "-"}</p>
                 </div>
@@ -66,27 +66,27 @@ export default async function AdminPage() {
             <div>
               <h3 className="text-lg font-semibold">Ultimos syncs</h3>
               <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead className="bg-slate-100 text-slate-600">
+                <table className="data-table">
+                  <thead>
                     <tr>
-                      <th className="px-3 py-2 font-medium">Tipo</th>
-                      <th className="px-3 py-2 font-medium">Estado</th>
-                      <th className="px-3 py-2 font-medium">Inicio</th>
-                      <th className="px-3 py-2 font-medium">Error</th>
+                      <th>Tipo</th>
+                      <th>Estado</th>
+                      <th>Inicio</th>
+                      <th>Error</th>
                     </tr>
                   </thead>
                   <tbody>
                     {result.value.recentSyncRuns.map((run) => (
-                      <tr className="border-t border-slate-200" key={run.id}>
-                        <td className="px-3 py-2">{run.type}</td>
-                        <td className="px-3 py-2">{run.status}</td>
-                        <td className="px-3 py-2 text-slate-600">{run.startedAt}</td>
-                        <td className="px-3 py-2 text-slate-600">{run.errorMessage ?? "-"}</td>
+                      <tr key={run.id}>
+                        <td>{run.type}</td>
+                        <td>{run.status}</td>
+                        <td className="text-slate-600">{run.startedAt}</td>
+                        <td className="text-slate-600">{run.errorMessage ?? "-"}</td>
                       </tr>
                     ))}
                     {result.value.recentSyncRuns.length === 0 ? (
                       <tr>
-                        <td className="px-3 py-4 text-slate-500" colSpan={4}>
+                        <td className="text-slate-500" colSpan={4}>
                           Todavia no hay syncs registrados.
                         </td>
                       </tr>

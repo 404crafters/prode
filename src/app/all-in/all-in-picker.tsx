@@ -22,7 +22,7 @@ export function AllInPicker({ matches, disabled }: AllInPickerProps) {
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <select
-        className="h-11 rounded-md border border-slate-300 px-3 text-sm text-slate-950 outline-none focus:border-emerald-600 disabled:bg-slate-100"
+        className="field-control text-sm"
         defaultValue={matches.find((match) => match.isCurrent)?.id ?? ""}
         disabled={disabled || pending}
         name="matchId"
@@ -40,7 +40,7 @@ export function AllInPicker({ matches, disabled }: AllInPickerProps) {
       {state.success ? <p className="text-sm font-medium text-emerald-700">{state.success}</p> : null}
 
       <button
-        className="h-11 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="primary-button"
         disabled={disabled || pending}
         type="submit"
       >

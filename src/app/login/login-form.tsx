@@ -13,7 +13,7 @@ export function LoginForm() {
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
         Usuario
         <input
-          className="h-11 rounded-md border border-slate-300 px-3 text-base text-slate-950 outline-none focus:border-emerald-600"
+          className="field-control text-base"
           name="username"
           autoComplete="username"
           required
@@ -23,7 +23,7 @@ export function LoginForm() {
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
         Contrasena
         <input
-          className="h-11 rounded-md border border-slate-300 px-3 text-base text-slate-950 outline-none focus:border-emerald-600"
+          className="field-control text-base"
           name="password"
           type="password"
           autoComplete="current-password"
@@ -34,7 +34,7 @@ export function LoginForm() {
       {state.error ? <p className="text-sm font-medium text-red-700">{state.error}</p> : null}
 
       <button
-        className="h-11 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="primary-button"
         disabled={pending}
         type="submit"
       >

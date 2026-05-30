@@ -10,10 +10,17 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,#d1fae5,transparent_30rem),linear-gradient(180deg,#f8fafc,#eef2f7)] px-6 text-slate-950">
-      <section className="w-full max-w-sm rounded-lg border border-white/80 bg-white/90 p-6 shadow-xl shadow-slate-200/70 backdrop-blur">
-        <p className="text-sm font-medium text-emerald-700">Mundial 2026</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-normal">Prode de 404</h1>
+    <main className="app-bg flex min-h-screen items-center justify-center px-6 text-slate-950">
+      <section className="surface w-full max-w-sm rounded-lg p-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950 text-base font-black text-white">
+            404
+          </div>
+          <div>
+            <p className="eyebrow">Mundial 2026</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-normal">Prode de 404</h1>
+          </div>
+        </div>
         <div className="mt-6">
           <LoginForm />
         </div>

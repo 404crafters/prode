@@ -119,6 +119,13 @@ Ultima actualizacion: 2026-05-30
   - "Standings" traducido a "Posiciones"
 - App renombrada a "Prode de 404".
 - Pulido visual general con superficies blancas translúcidas, sombras suaves y tarjetas mas escaneables.
+- Rediseño visual general:
+  - fondo global mas trabajado
+  - header con marca 404
+  - superficies, metric cards, badges, botones, inputs y tablas consistentes
+  - home con ranking en tarjetas
+  - fixture con tarjetas mas destacadas por grupo/instancia
+  - formularios de login, pronosticos, All-In y especiales alineados al nuevo estilo
 - Verificaciones actuales:
   - `npm test`
   - `npm run lint`

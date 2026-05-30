@@ -25,20 +25,25 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#d1fae5,transparent_32rem),linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-950">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-8 py-8">
-        <header className="flex items-center justify-between rounded-lg border border-white/70 bg-white/80 px-5 py-4 shadow-sm shadow-slate-200/70 backdrop-blur">
-          <div>
-            <p className="text-sm font-medium text-emerald-700">Mundial 2026</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-normal">Prode de 404</h1>
+    <main className="app-bg min-h-screen text-slate-950">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-7 px-8 py-8">
+        <header className="surface flex items-center justify-between rounded-lg px-5 py-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-950 text-lg font-black text-white">
+              404
+            </div>
+            <div>
+              <p className="eyebrow">Mundial 2026</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-normal">Prode de 404</h1>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700">
+            <span className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm">
               {user.displayName}
             </span>
             <Link
-              className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+              className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
               href="/logout"
             >
               Salir
@@ -51,7 +56,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             .filter((item) => !item.adminOnly || user.role === "admin")
             .map((item) => (
               <Link
-                className="rounded-md border border-white/80 bg-white/85 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm shadow-slate-200/60 hover:border-emerald-300 hover:text-emerald-800"
+                className="rounded-md border border-white/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm shadow-slate-200/60 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-900"
                 href={item.href}
                 key={item.href}
               >

@@ -11,7 +11,7 @@ export function SyncButton() {
   return (
     <form action={formAction} className="flex items-center gap-3">
       <button
-        className="h-10 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="primary-button h-10"
         disabled={pending}
         type="submit"
       >
