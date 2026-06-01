@@ -224,6 +224,7 @@ Ultima actualizacion: 2026-06-01
   - admin puede crear/actualizar usuarios, cambiar passwords y activar/desactivar
 - Deploy Docker preparado:
   - `Dockerfile` multi-stage con Next standalone
+  - imagen base Node 20.19.x para cumplir engines del toolchain
   - `docker-compose.yml` con Traefik y HTTPS automatico via Let's Encrypt
   - dominio y email ACME definidos directamente en `docker-compose.yml`
   - servicios operativos `migrate` y `sync-once`

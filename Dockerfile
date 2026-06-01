@@ -1,4 +1,4 @@
-FROM node:20.11.1-alpine3.19 AS base
+FROM node:20.19.6-alpine3.21 AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 

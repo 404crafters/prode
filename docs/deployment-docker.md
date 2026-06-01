@@ -3,6 +3,7 @@
 ## Archivos
 
 - `Dockerfile`: build multi-stage. La app corre con `output: "standalone"` de Next.js.
+- La imagen base usa Node 20.19.x porque dependencias del build requieren `^20.19.0`.
 - `docker-compose.yml`: levanta Traefik, la app y servicios operativos para migrar/sincronizar. Compatible con `docker-compose` v1.
 - `.env.production.example`: plantilla de variables para el server. Copiarla como `.env`.
 
