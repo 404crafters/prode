@@ -13,8 +13,6 @@
 3. Copiar el repo o hacer `git clone`.
 4. Crear `.env` desde `.env.production.example`.
 5. Completar:
-   - `APP_DOMAIN`
-   - `TRAEFIK_ACME_EMAIL`
    - `DATABASE_URL`
    - `SESSION_SECRET`
    - `CRON_SECRET`
@@ -77,13 +75,13 @@ Ventajas:
 Ejemplo hourly en el host:
 
 ```cron
-0 * * * * curl -fsS -H "Authorization: Bearer TU_CRON_SECRET" https://prode.example.com/api/cron/sync >/dev/null
+0 * * * * curl -fsS -H "Authorization: Bearer TU_CRON_SECRET" https://prode.404crafters.com/api/cron/sync >/dev/null
 ```
 
 Para dias con partidos, se puede bajar temporalmente a cada 30 minutos si el cupo de football-data.org lo permite:
 
 ```cron
-*/30 * * * * curl -fsS -H "Authorization: Bearer TU_CRON_SECRET" https://prode.example.com/api/cron/sync >/dev/null
+*/30 * * * * curl -fsS -H "Authorization: Bearer TU_CRON_SECRET" https://prode.404crafters.com/api/cron/sync >/dev/null
 ```
 
 ## Comandos utiles

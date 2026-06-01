@@ -225,8 +225,9 @@ Ultima actualizacion: 2026-06-01
 - Deploy Docker preparado:
   - `Dockerfile` multi-stage con Next standalone
   - `docker-compose.yml` con Traefik y HTTPS automatico via Let's Encrypt
+  - dominio y email ACME definidos directamente en `docker-compose.yml`
   - servicios operativos `migrate` y `sync-once`
-  - `.env.production.example` como plantilla para crear `.env`
+  - `.env.production.example` como plantilla para crear `.env` con variables de la app
   - comandos documentados con `docker-compose` v1 por compatibilidad del server
   - guia en `docs/deployment-docker.md`
 
