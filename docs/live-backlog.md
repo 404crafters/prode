@@ -163,7 +163,7 @@ Ultima actualizacion: 2026-06-01
   - script `npm run sync:football-data`
   - admin y cron apuntando a football-data.org
 - Tests agregados para mapper football-data.org y calculo local de standings.
-- Plan de migracion a football-data.org y deploy Vercel definido en este backlog.
+- Plan de migracion a football-data.org definido en este backlog.
 - Usuarios en DB via `app_users`.
 - Passwords hasheadas con `scrypt`.
 - Bootstrap inicial de admin en migracion:
@@ -215,16 +215,19 @@ Ultima actualizacion: 2026-06-01
   - `/especiales`
   - `/ranking`
   - `/admin`
-- Cron Vercel configurado en `vercel.json`:
-  - `/api/cron/sync`
-  - cada 1 hora
-- Endpoint `/api/cron/sync` acepta `Authorization: Bearer $CRON_SECRET`, compatible con Vercel Cron.
+- Endpoint `/api/cron/sync` acepta `Authorization: Bearer $CRON_SECRET`.
 - Usuarios en DB implementados:
   - tabla `app_users`
   - login contra DB
   - passwords con hash `scrypt`
   - ranking y pronosticos visibles usan usuarios activos de DB
   - admin puede crear/actualizar usuarios, cambiar passwords y activar/desactivar
+- Deploy Docker preparado:
+  - `Dockerfile` multi-stage con Next standalone
+  - `docker-compose.yml` con Traefik y HTTPS automatico via Let's Encrypt
+  - servicios operativos `migrate` y `sync-once`
+  - `.env.production.example`
+  - guia en `docs/deployment-docker.md`
 
 ## Bloqueado / externo
 
@@ -253,9 +256,9 @@ Objetivo: revisar la app con datos reales ya sincronizados en Supabase dev.
 - Validar alta/cambio de password de usuarios desde `/admin`.
 - Si queda OK, documentar el mismo flujo para Supabase prod.
 
-### 2. Supabase productivo
+### 2. Base productiva
 
-Objetivo: preparar DB limpia para Vercel.
+Objetivo: preparar DB limpia para produccion.
 
 - Crear proyecto Supabase prod separado del dev.
 - Copiar connection string pooled/transaction para runtime en `DATABASE_URL`.
@@ -269,26 +272,26 @@ Objetivo: preparar DB limpia para Vercel.
   - 104 partidos
   - standings iniciales por grupo con 4 equipos cada uno y 0 PJ.
 
-### 3. Deploy Vercel
+### 3. Deploy Docker
 
-Objetivo: publicar una version usable con sync automatico.
+Objetivo: publicar una version usable con Docker y Traefik.
 
-- Crear proyecto Vercel conectado al repo.
-- Configurar env vars:
-  - `DATABASE_URL`
-  - `SESSION_SECRET`
-  - `CRON_SECRET`
-  - `FOOTBALL_DATA_API_TOKEN`
-  - `FOOTBALL_DATA_BASE_URL`
-  - `FOOTBALL_DATA_COMPETITION`
-  - `FOOTBALL_DATA_SEASON`
-  - `SIMULATION_MODE=false`
-- Definir frecuencia de cron:
+- Preparar server privado:
+  - Docker
+  - Docker Compose
+  - puertos 80/443 abiertos
+  - DNS del dominio apuntando al server
+- Crear `.env.production` desde `.env.production.example`.
+- Ejecutar migracion inicial:
+  - `docker compose --env-file .env.production --profile ops run --rm migrate`
+- Ejecutar sync inicial:
+  - `docker compose --env-file .env.production --profile ops run --rm sync-once`
+- Levantar app y Traefik:
+  - `docker compose --env-file .env.production up -d --build app traefik`
+- Configurar cron del host contra `/api/cron/sync`:
   - base recomendada: cada 1 hora.
-  - durante dias con partidos: bajar a cada 15 o 30 minutos solo si el plan de Vercel y el cupo de football-data.org lo permiten.
+  - durante dias con partidos: bajar a cada 15 o 30 minutos solo si el cupo de football-data.org lo permite.
   - despues del Mundial: apagar o dejar diario.
-- Proteger `/api/cron/sync` con `CRON_SECRET`.
-- Probar deploy preview y luego produccion.
 
 ### 4. Checklist pre-lanzamiento
 
@@ -325,5 +328,8 @@ npm run db:migrate
 npm run sync:football-data
 npm run db:seed:group-stage-mid
 npm run dev -- --port 3001
+docker compose --env-file .env.production up -d --build app traefik
+docker compose --env-file .env.production --profile ops run --rm migrate
+docker compose --env-file .env.production --profile ops run --rm sync-once
 ```
 
