@@ -1,6 +1,8 @@
+version: "3.8"
+
 services:
   traefik:
-    image: traefik:v3.3
+    image: traefik:v2.10.7
     restart: unless-stopped
     command:
       - --providers.docker=true
@@ -9,7 +11,7 @@ services:
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --certificatesresolvers.letsencrypt.acme.email=nicolasbottarini@gmail.com
+      - --certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL}
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
@@ -29,6 +31,8 @@ services:
       dockerfile: Dockerfile
       target: runner
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
@@ -36,7 +40,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=prode-web
-      - traefik.http.routers.prode.rule=Host(`prode.404crafters.com`)
+      - traefik.http.routers.prode.rule=Host(`${APP_DOMAIN}`)
       - traefik.http.routers.prode.entrypoints=websecure
       - traefik.http.routers.prode.tls=true
       - traefik.http.routers.prode.tls.certresolver=letsencrypt
@@ -47,24 +51,24 @@ services:
 
   migrate:
     image: prode-404-tools:latest
-    profiles:
-      - ops
     build:
       context: .
       dockerfile: Dockerfile
       target: tools
+    env_file:
+      - .env
     command: npm run db:migrate
     networks:
       - app
 
   sync-once:
     image: prode-404-tools:latest
-    profiles:
-      - ops
     build:
       context: .
       dockerfile: Dockerfile
       target: tools
+    env_file:
+      - .env
     command: npm run sync:football-data
     networks:
       - app

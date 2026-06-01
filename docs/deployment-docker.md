@@ -3,15 +3,15 @@
 ## Archivos
 
 - `Dockerfile`: build multi-stage. La app corre con `output: "standalone"` de Next.js.
-- `docker-compose.yml`: levanta Traefik, la app y servicios operativos para migrar/sincronizar.
-- `.env.production.example`: plantilla de variables para el server.
+- `docker-compose.yml`: levanta Traefik, la app y servicios operativos para migrar/sincronizar. Compatible con `docker-compose` v1.
+- `.env.production.example`: plantilla de variables para el server. Copiarla como `.env`.
 
 ## Primer deploy
 
 1. Apuntar el DNS del dominio al server.
-2. En el server, instalar Docker y Docker Compose.
+2. En el server, instalar Docker Engine y `docker-compose`.
 3. Copiar el repo o hacer `git clone`.
-4. Crear `.env.production` desde `.env.production.example`.
+4. Crear `.env` desde `.env.production.example`.
 5. Completar:
    - `APP_DOMAIN`
    - `TRAEFIK_ACME_EMAIL`
@@ -22,19 +22,19 @@
 6. Ejecutar migraciones:
 
 ```bash
-docker compose --env-file .env.production --profile ops run --rm migrate
+docker-compose run --rm migrate
 ```
 
 7. Cargar fixture real:
 
 ```bash
-docker compose --env-file .env.production --profile ops run --rm sync-once
+docker-compose run --rm sync-once
 ```
 
 8. Levantar la app:
 
 ```bash
-docker compose --env-file .env.production up -d --build app traefik
+docker-compose up -d --build app traefik
 ```
 
 9. Entrar con `admin` / `admin`, cambiar password y crear usuarios.
@@ -43,15 +43,25 @@ docker compose --env-file .env.production up -d --build app traefik
 
 ```bash
 git pull
-docker compose --env-file .env.production --profile ops run --rm migrate
-docker compose --env-file .env.production up -d --build app
+docker-compose run --rm migrate
+docker-compose up -d --build app
 ```
 
 Si hay cambios que dependen de datos nuevos del fixture:
 
 ```bash
-docker compose --env-file .env.production --profile ops run --rm sync-once
+docker-compose run --rm sync-once
 ```
+
+Como el archivo se llama `.env`, Compose lo lee automaticamente:
+
+```bash
+docker-compose run --rm migrate
+docker-compose run --rm sync-once
+docker-compose up -d --build app traefik
+```
+
+Esta configuracion evita features de Compose v2 y usa tags de imagenes mas conservadores para mejorar compatibilidad con `docker-compose` v1.
 
 ## Cron recomendado
 
@@ -79,10 +89,10 @@ Para dias con partidos, se puede bajar temporalmente a cada 30 minutos si el cup
 ## Comandos utiles
 
 ```bash
-docker compose --env-file .env.production ps
-docker compose --env-file .env.production logs -f app
-docker compose --env-file .env.production logs -f traefik
-docker compose --env-file .env.production --profile ops run --rm migrate
-docker compose --env-file .env.production --profile ops run --rm sync-once
-docker compose --env-file .env.production up -d --build app traefik
+docker-compose ps
+docker-compose logs -f app
+docker-compose logs -f traefik
+docker-compose run --rm migrate
+docker-compose run --rm sync-once
+docker-compose up -d --build app traefik
 ```

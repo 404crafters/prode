@@ -226,7 +226,8 @@ Ultima actualizacion: 2026-06-01
   - `Dockerfile` multi-stage con Next standalone
   - `docker-compose.yml` con Traefik y HTTPS automatico via Let's Encrypt
   - servicios operativos `migrate` y `sync-once`
-  - `.env.production.example`
+  - `.env.production.example` como plantilla para crear `.env`
+  - comandos documentados con `docker-compose` v1 por compatibilidad del server
   - guia en `docs/deployment-docker.md`
 
 ## Bloqueado / externo
@@ -278,16 +279,16 @@ Objetivo: publicar una version usable con Docker y Traefik.
 
 - Preparar server privado:
   - Docker
-  - Docker Compose
+  - docker-compose
   - puertos 80/443 abiertos
   - DNS del dominio apuntando al server
 - Crear `.env.production` desde `.env.production.example`.
 - Ejecutar migracion inicial:
-  - `docker compose --env-file .env.production --profile ops run --rm migrate`
+  - `docker-compose run --rm migrate`
 - Ejecutar sync inicial:
-  - `docker compose --env-file .env.production --profile ops run --rm sync-once`
+  - `docker-compose run --rm sync-once`
 - Levantar app y Traefik:
-  - `docker compose --env-file .env.production up -d --build app traefik`
+  - `docker-compose up -d --build app traefik`
 - Configurar cron del host contra `/api/cron/sync`:
   - base recomendada: cada 1 hora.
   - durante dias con partidos: bajar a cada 15 o 30 minutos solo si el cupo de football-data.org lo permite.
@@ -328,8 +329,8 @@ npm run db:migrate
 npm run sync:football-data
 npm run db:seed:group-stage-mid
 npm run dev -- --port 3001
-docker compose --env-file .env.production up -d --build app traefik
-docker compose --env-file .env.production --profile ops run --rm migrate
-docker compose --env-file .env.production --profile ops run --rm sync-once
+docker-compose up -d --build app traefik
+docker-compose run --rm migrate
+docker-compose run --rm sync-once
 ```
 
