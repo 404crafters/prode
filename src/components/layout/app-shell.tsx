@@ -63,6 +63,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
                 className="rounded-md border border-slate-700 bg-slate-900/85 px-3 py-2 text-sm font-semibold text-slate-200 shadow-sm hover:border-emerald-400 hover:bg-emerald-950/70 hover:text-emerald-100"
                 href={item.href}
                 key={item.href}
+                prefetch={false}
               >
                 {item.label}
               </Link>

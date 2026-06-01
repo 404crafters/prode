@@ -3,36 +3,13 @@ import postgres from "postgres";
 import { requireEnv } from "@/lib/env";
 import * as schema from "./schema";
 
-const globalForDb = globalThis as unknown as {
-  postgresClient?: postgres.Sql;
-};
-
-function getPostgresClient(): postgres.Sql {
-  if (!globalForDb.postgresClient) {
-    globalForDb.postgresClient = postgres(requireEnv("DATABASE_URL"), {
-      idle_timeout: 20,
-      max: 10,
-      prepare: false,
-      ssl: "require",
-    });
-  }
-
-  return globalForDb.postgresClient;
-}
+const client = postgres(requireEnv("DATABASE_URL"), {
+  prepare: false,
+  ssl: "require",
+});
 
 export async function closeDbConnection() {
-  if (globalForDb.postgresClient) {
-    await globalForDb.postgresClient.end();
-    globalForDb.postgresClient = undefined;
-  }
+  await client.end();
 }
 
-export function getDb() {
-  return drizzle(getPostgresClient(), { schema });
-}
-
-export const db = new Proxy({} as ReturnType<typeof getDb>, {
-  get(_target, prop, receiver) {
-    return Reflect.get(getDb(), prop, receiver);
-  },
-});
+export const db = drizzle(client, { schema });

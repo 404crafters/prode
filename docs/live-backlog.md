@@ -243,10 +243,11 @@ Ultima actualizacion: 2026-06-01
 - Conexion DB revertida al comportamiento del deploy funcional `2cd0da0`:
   - el ajuste de pool/cache en produccion dejaba Vercel colgado
   - el sync completo no debe correrse desde `/admin` en Vercel hasta moverlo fuera del runtime web
-- Conexion DB reajustada por `EMAXCONN`:
-  - se cachea solo el cliente Postgres globalmente para no crear pools infinitos en Vercel
-  - se mantiene `max: 10` para no bloquear queries paralelas de las paginas
-  - no se cachea la instancia Drizzle
+- Conexion DB:
+  - cliente DB alineado al ejemplo oficial Supabase + Drizzle
+  - singleton de modulo con `postgres(DATABASE_URL, { prepare: false })`
+  - sin `globalThis`, sin `Proxy`, sin pool custom
+  - nav principal con `prefetch={false}` por transaction pooler
 - Performance inicial ajustada:
   - `getCurrentUser()` deduplicado por request con `cache()`
   - home deja de consultar `getAdminSummary()` porque ya no muestra esos contadores
