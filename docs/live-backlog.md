@@ -240,6 +240,9 @@ Ultima actualizacion: 2026-06-01
 - Logout corregido:
   - `Salir` usa server action por POST
   - `GET /logout` ya no borra cookie para evitar logout por prefetch de Next
+- Conexion DB ajustada para Vercel/Supabase:
+  - cliente Postgres cacheado tambien en produccion
+  - pool limitado por instancia para evitar `EMAXCONN max client connections reached`
 
 ## Bloqueado / externo
 
