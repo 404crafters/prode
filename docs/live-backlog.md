@@ -237,6 +237,9 @@ Ultima actualizacion: 2026-06-01
   - app en Vercel
   - sync horario con cron externo via `curl`
   - guia en `docs/deployment-vercel.md`
+- Logout corregido:
+  - `Salir` usa server action por POST
+  - `GET /logout` ya no borra cookie para evitar logout por prefetch de Next
 
 ## Bloqueado / externo
 

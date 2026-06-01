@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { logoutAction } from "@/app/logout/actions";
 import { getCurrentUser } from "@/lib/auth";
 
 type NavItem = {
@@ -43,12 +44,14 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             <span className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-200 shadow-sm">
               {user.displayName}
             </span>
-            <Link
-              className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
-              href="/logout"
-            >
-              Salir
-            </Link>
+            <form action={logoutAction}>
+              <button
+                className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
+                type="submit"
+              >
+                Salir
+              </button>
+            </form>
           </div>
         </header>
 
