@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
+import { TeamLabel } from "@/components/team/team-label";
 import { SetupWarning } from "@/components/ui/setup-warning";
 import { getMatchDetail } from "@/db/queries/match-detail";
 import { getCurrentUser } from "@/lib/auth";
@@ -28,8 +29,8 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
   return (
     <AppShell>
       <section className="surface rounded-lg p-6">
-        <Link className="text-sm font-medium text-emerald-700" href="/matches">
-          Volver a partidos
+        <Link className="text-sm font-medium text-emerald-700" href="/fixture">
+          Volver al fixture
         </Link>
 
         {!result.ok ? <div className="mt-5"><SetupWarning error={result.error} /></div> : null}
@@ -41,7 +42,11 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                 {match.roundName ?? match.stage}
               </p>
               <h2 className="mt-1 text-3xl font-semibold">
-                {match.homeTeam?.name ?? "TBD"} vs {match.awayTeam?.name ?? "TBD"}
+                <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <TeamLabel flagClassName="h-8 w-8" flagUrl={match.homeTeam?.flagUrl} name={match.homeTeam?.name ?? "TBD"} />
+                  <span className="text-slate-500">vs</span>
+                  <TeamLabel flagClassName="h-8 w-8" flagUrl={match.awayTeam?.flagUrl} name={match.awayTeam?.name ?? "TBD"} />
+                </span>
               </h2>
               <p className="mt-2 text-sm text-slate-500">
                 Partido: {match.kickoffLabel} - Cierre: {match.deadlineLabel}
@@ -68,7 +73,13 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                             {match.ownPrediction.homeGoals} - {match.ownPrediction.awayGoals}
                           </p>
                           {match.ownPrediction.predictedWinnerTeamName ? (
-                            <p>Ganador por penales: {match.ownPrediction.predictedWinnerTeamName}</p>
+                            <p className="inline-flex items-center gap-2">
+                              <span>Ganador por penales:</span>
+                              <TeamLabel
+                                flagUrl={match.ownPrediction.predictedWinnerTeamFlagUrl}
+                                name={match.ownPrediction.predictedWinnerTeamName}
+                              />
+                            </p>
                           ) : null}
                           {match.ownPrediction.isScored ? (
                             <p>
@@ -133,7 +144,12 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                     ? "Todavia no hay resultado."
                     : `${match.homeGoals} - ${match.awayGoals}`}
                 </p>
-                {match.winnerTeamName ? <p>Ganador final: {match.winnerTeamName}</p> : null}
+                {match.winnerTeamName ? (
+                  <p className="inline-flex items-center gap-2">
+                    <span>Ganador final:</span>
+                    <TeamLabel flagUrl={match.winnerTeamFlagUrl} name={match.winnerTeamName} />
+                  </p>
+                ) : null}
                 {!match.isPredictionOpen && (match.homeGoals === null || match.awayGoals === null) ? (
                   <p className="rounded-md bg-amber-50 px-3 py-2 text-amber-900">
                     El partido ya cerro para pronosticos, pero todavia no tiene resultado.
@@ -169,7 +185,12 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
                               : `${prediction.homeGoals} - ${prediction.awayGoals}`}
                           </td>
                           <td className="text-slate-600">
-                            {prediction.predictedWinnerTeamName ?? "-"}
+                            {prediction.predictedWinnerTeamName ? (
+                              <TeamLabel
+                                flagUrl={prediction.predictedWinnerTeamFlagUrl}
+                                name={prediction.predictedWinnerTeamName}
+                              />
+                            ) : "-"}
                           </td>
                           <td className="font-semibold">
                             {prediction.finalPoints === null

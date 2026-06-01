@@ -1,4 +1,3 @@
-import { users } from "@/config/users";
 import { db } from "@/db/client";
 import {
   matches,
@@ -23,6 +22,7 @@ import {
   getTournamentPodium,
 } from "@/domain/tournament";
 import { formatArgentinaDateTime } from "@/lib/date";
+import { getActiveUsers, type AppUser } from "./users";
 
 export type RankingRow = {
   position: number;
@@ -61,18 +61,18 @@ type RankingData = Awaited<ReturnType<typeof loadRankingData>>;
 
 export async function getRanking(): Promise<RankingRow[]> {
   const data = await loadRankingData();
-  return rankRows(users.filter((user) => user.active !== false).map((user) => calculateUserRow(data, user.username)));
+  return rankRows(data.users.map((user) => calculateUserRow(data, user)));
 }
 
 export async function getRankingDetail(username: string): Promise<RankingDetail | null> {
-  const user = users.find((candidate) => candidate.username === username && candidate.active !== false);
+  const data = await loadRankingData();
+  const user = data.users.find((candidate) => candidate.username === username);
 
   if (!user) {
     return null;
   }
 
-  const data = await loadRankingData();
-  const rows = rankRows(users.filter((candidate) => candidate.active !== false).map((candidate) => calculateUserRow(data, candidate.username)));
+  const rows = rankRows(data.users.map((candidate) => calculateUserRow(data, candidate)));
   const row = rows.find((candidate) => candidate.username === username);
 
   if (!row) {
@@ -87,7 +87,8 @@ export async function getRankingDetail(username: string): Promise<RankingDetail 
 }
 
 async function loadRankingData() {
-  const [matchRows, predictionRows, allInRows, specialRows, standingRows, teamRows, groupRows] = await Promise.all([
+  const [users, matchRows, predictionRows, allInRows, specialRows, standingRows, teamRows, groupRows] = await Promise.all([
+    getActiveUsers(),
     db.select().from(matches),
     db.select().from(matchPredictions),
     db.select().from(userAllIns),
@@ -103,6 +104,7 @@ async function loadRankingData() {
 
   return {
     matchRows,
+    users,
     predictionRows,
     allInRows,
     specialRows,
@@ -122,8 +124,8 @@ async function loadRankingData() {
   };
 }
 
-function calculateUserRow(data: RankingData, username: string): RankingRow {
-  const user = users.find((candidate) => candidate.username === username);
+function calculateUserRow(data: RankingData, user: AppUser): RankingRow {
+  const username = user.username;
   const matchDetails = calculateMatchDetails(data, username);
   const specialDetails = calculateSpecialDetails(data, username);
   const matchPoints = matchDetails.reduce((total, detail) => total + detail.finalPoints, 0);

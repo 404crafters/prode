@@ -4,7 +4,7 @@
 
 Construir una aplicacion web interna para que un grupo reducido de usuarios de oficina participe en un prode del Mundial de Futbol 2026.
 
-La aplicacion debe permitir cargar pronosticos de partidos y pronosticos especiales, bloquear cargas segun fechas definidas, mostrar las predicciones del resto cuando corresponda, sincronizar datos oficiales desde API-Football, calcular puntajes y mantener un ranking individual.
+La aplicacion debe permitir cargar pronosticos de partidos y pronosticos especiales, bloquear cargas segun fechas definidas, mostrar las predicciones del resto cuando corresponda, sincronizar datos oficiales desde football-data.org, calcular puntajes y mantener un ranking individual.
 
 El alcance prioriza simplicidad operativa sobre seguridad avanzada, administracion compleja o features sociales.
 
@@ -12,9 +12,9 @@ El alcance prioriza simplicidad operativa sobre seguridad avanzada, administraci
 
 Incluido:
 
-- Login simple con usuarios definidos en configuracion estatica.
+- Login simple con usuarios en DB y passwords hasheadas.
 - Usuario admin definido en configuracion estatica.
-- Fixture, equipos, grupos, standings, estados y resultados sincronizados desde API-Football.
+- Fixture, equipos, grupos, standings, estados y resultados sincronizados desde football-data.org.
 - Persistencia local en Supabase Postgres.
 - Calendario de partidos.
 - Vista de grupos.
@@ -64,8 +64,6 @@ Admin:
 
 ### 3.2 Configuracion de usuarios
 
-Los usuarios se definen en un archivo de configuracion estatica.
-
 Formato funcional esperado:
 
 - username
@@ -74,7 +72,7 @@ Formato funcional esperado:
 - role: user o admin
 - active: booleano opcional
 
-No hay recuperacion de contraseña ni administracion de usuarios desde la UI.
+No hay recuperacion de contraseña.
 
 ### 3.3 Reglas de acceso
 
@@ -107,11 +105,11 @@ Esta regla aplica a:
 
 ## 5. Datos sincronizados
 
-La aplicacion no debe consultar API-Football desde el frontend.
+La aplicacion no debe consultar football-data.org desde el frontend.
 
 La sincronizacion se realiza desde backend/jobs. Los datos se guardan en Supabase Postgres y el frontend consulta solamente la base de datos propia.
 
-### 5.1 Datos esperados desde API-Football
+### 5.1 Datos esperados desde football-data.org
 
 - Equipos/selecciones.
 - Grupos.
@@ -140,7 +138,7 @@ Durante el Mundial:
 
 No se incluye correccion manual de resultados.
 
-Si API-Football falla o no trae un dato necesario, se debe mostrar el problema en la pantalla admin. La resolucion operativa queda fuera del MVP y se evaluara si aparece el caso.
+Si football-data.org falla o no trae un dato necesario, se debe mostrar el problema en la pantalla admin. La resolucion operativa queda fuera del MVP y se evaluara si aparece el caso.
 
 ## 6. Estructura del Mundial
 
@@ -163,7 +161,7 @@ Las instancias funcionales minimas son:
 - Tercer puesto
 - Final
 
-La nomenclatura exacta puede adaptarse a la que entregue API-Football, pero la app debe poder clasificar un partido como fase de grupos o eliminatoria.
+La nomenclatura exacta puede adaptarse a la que entregue football-data.org, pero la app debe poder clasificar un partido como fase de grupos o eliminatoria.
 
 ## 7. Pronosticos de partidos
 
@@ -348,7 +346,7 @@ Incorrecto - 0 puntos:
 
 Casos especiales:
 
-- Si el partido real termina empatado en goles y se define por penales, el ganador final sincronizado desde API-Football es obligatorio para calcular exacto o full.
+- Si el partido real termina empatado en goles y se define por penales, el ganador final sincronizado desde football-data.org es obligatorio para calcular exacto o full.
 - Si el usuario acierta el score empatado pero elige mal el ganador por penales, suma 1 punto.
 - Si el usuario acierta los goles pero no acierta el ganador final, suma 1 punto.
 - Si el usuario acierta el ganador final pero no los goles, suma 3 puntos.
@@ -566,7 +564,7 @@ Estados derivados:
 
 ### 15.1 Partido postergado
 
-Si API-Football modifica la fecha de un partido, la fecha de cierre debe recalcularse con la nueva fecha.
+Si football-data.org modifica la fecha de un partido, la fecha de cierre debe recalcularse con la nueva fecha.
 
 Si el partido ya habia cerrado y luego se posterga, se acepta que el comportamiento puede quedar sujeto a revision posterior. Para el MVP, el cierre sigue la fecha actualmente sincronizada.
 
@@ -589,7 +587,7 @@ Si cambia la fecha, equipo o instancia de un partido por sync:
 
 - Se actualiza la informacion local.
 - Los pronosticos existentes se conservan asociados al partido externo.
-- Si el cambio deja inconsistente un pronostico, se resolvera en etapa tecnica segun el identificador estable de API-Football.
+- Si el cambio deja inconsistente un pronostico, se resolvera en etapa tecnica segun el identificador estable de football-data.org.
 
 ### 15.4 Resultado incompleto
 
@@ -615,7 +613,7 @@ Si termina el Mundial y un usuario nunca eligio All-In:
 
 - Un usuario puede iniciar sesion con credenciales definidas en config.
 - Un usuario no autenticado no puede acceder a ninguna pantalla interna.
-- El fixture se consulta desde la DB local, no desde API-Football en frontend.
+- El fixture se consulta desde la DB local, no desde football-data.org en frontend.
 - Un usuario puede cargar pronosticos para partidos abiertos.
 - Un usuario no puede cargar ni editar pronosticos el dia del partido.
 - Un usuario no puede ver pronosticos de otros antes del cierre.
@@ -634,7 +632,7 @@ Si termina el Mundial y un usuario nunca eligio All-In:
 - Definir formato exacto de archivo de usuarios.
 - Definir estrategia de sesion y cookie.
 - Definir frecuencia de cron jobs en Vercel.
-- Definir mapeo exacto de estados de API-Football.
+- Definir mapeo exacto de estados de football-data.org.
 - Definir como identificar inicio del Mundial e inicio de eliminatorias desde datos sincronizados o config.
 - Definir estrategia de cache y limite de requests.
 - Definir pruebas unitarias del motor de scoring.
@@ -650,7 +648,7 @@ Capacidades:
 - Activar simulation mode por variable de entorno.
 - Setear la fecha/hora actual por variable de entorno.
 - Cargar escenarios versionados con comandos.
-- Probar cierres, visibilidad, scoring, All-In, especiales y ranking sin depender de API-Football.
+- Probar cierres, visibilidad, scoring, All-In, especiales y ranking sin depender de football-data.org.
 
 Escenarios deseados:
 
@@ -665,3 +663,5 @@ Escenarios deseados:
 No se usara Mockoon en esta etapa.
 
 La aplicacion debe mostrar de forma visible cuando simulation mode esta activo.
+
+

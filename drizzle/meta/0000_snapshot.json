@@ -255,8 +255,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "api_football_fixture_id": {
-          "name": "api_football_fixture_id",
+        "external_fixture_id": {
+          "name": "external_fixture_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -365,11 +365,11 @@
         }
       },
       "indexes": {
-        "matches_api_football_fixture_id_idx": {
-          "name": "matches_api_football_fixture_id_idx",
+        "matches_external_fixture_id_idx": {
+          "name": "matches_external_fixture_id_idx",
           "columns": [
             {
-              "expression": "api_football_fixture_id",
+              "expression": "external_fixture_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -779,8 +779,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "api_football_team_id": {
-          "name": "api_football_team_id",
+        "external_team_id": {
+          "name": "external_team_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -819,11 +819,11 @@
         }
       },
       "indexes": {
-        "teams_api_football_team_id_idx": {
-          "name": "teams_api_football_team_id_idx",
+        "teams_external_team_id_idx": {
+          "name": "teams_external_team_id_idx",
           "columns": [
             {
-              "expression": "api_football_team_id",
+              "expression": "external_team_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

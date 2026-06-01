@@ -27,7 +27,7 @@ export type AllInView = {
 export async function getAllInView(username: string): Promise<AllInView> {
   const now = getNow();
   const [matchRows, teamRows, groupRows, allInRows] = await Promise.all([
-    db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.apiFootballFixtureId)),
+    db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.externalFixtureId)),
     db.select().from(teams),
     db.select().from(groups),
     db.select().from(userAllIns).where(eq(userAllIns.username, username)),

@@ -193,9 +193,9 @@ Criterios de aceptacion:
 
 ## Epic 4 - Sincronizacion
 
-### US-008 - Cliente API-Football
+### US-008 - Cliente football-data.org
 
-Como sistema, quiero consultar API-Football desde backend para traer datos del Mundial.
+Como sistema, quiero consultar football-data.org desde backend para traer datos del Mundial.
 
 Criterios de aceptacion:
 
@@ -409,3 +409,4 @@ Criterios de aceptacion:
 - Veo ultimo sync exitoso.
 - Veo errores recientes.
 - Veo cantidad de equipos, partidos y standings.
+

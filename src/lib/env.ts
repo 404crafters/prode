@@ -4,10 +4,10 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1).optional(),
   SESSION_SECRET: z.string().min(1).optional(),
   CRON_SECRET: z.string().min(1).optional(),
-  API_FOOTBALL_KEY: z.string().min(1).optional(),
-  API_FOOTBALL_BASE_URL: z.string().url().default("https://v3.football.api-sports.io"),
-  API_FOOTBALL_LEAGUE_ID: z.coerce.number().int().positive().default(1),
-  API_FOOTBALL_SEASON: z.coerce.number().int().positive().default(2026),
+  FOOTBALL_DATA_API_TOKEN: z.string().min(1).optional(),
+  FOOTBALL_DATA_BASE_URL: z.string().url().default("https://api.football-data.org/v4"),
+  FOOTBALL_DATA_COMPETITION: z.string().min(1).default("WC"),
+  FOOTBALL_DATA_SEASON: z.coerce.number().int().positive().default(2026),
   SIMULATION_MODE: z
     .enum(["true", "false"])
     .default("false")

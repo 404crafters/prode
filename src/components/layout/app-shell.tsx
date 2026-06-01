@@ -10,9 +10,10 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/", label: "Home" },
-  { href: "/matches", label: "Partidos" },
-  { href: "/groups", label: "Grupos" },
-  { href: "/specials", label: "Especiales" },
+  { href: "/fixture", label: "Fixture" },
+  { href: "/agenda", label: "Agenda" },
+  { href: "/grupos", label: "Grupos" },
+  { href: "/especiales", label: "Especiales" },
   { href: "/ranking", label: "Ranking" },
   { href: "/admin", label: "Admin", adminOnly: true },
 ];

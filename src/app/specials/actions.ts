@@ -93,7 +93,7 @@ export async function saveSpecialPredictionAction(
       },
     });
 
-  revalidatePath("/specials");
+  revalidatePath("/especiales");
   revalidatePath("/");
 
   return { success: "Especial guardado." };

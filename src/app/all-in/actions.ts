@@ -83,9 +83,9 @@ export async function saveAllInAction(
 
   revalidatePath("/");
   revalidatePath("/all-in");
-  revalidatePath("/specials");
-  revalidatePath("/matches");
-  revalidatePath(`/matches/${targetMatch.id}`);
+  revalidatePath("/especiales");
+  revalidatePath("/fixture");
+  revalidatePath(`/fixture/${targetMatch.id}`);
 
   return { success: "All-In actualizado." };
 }
@@ -127,11 +127,11 @@ export async function deleteAllInAction(
 
   revalidatePath("/");
   revalidatePath("/all-in");
-  revalidatePath("/specials");
-  revalidatePath("/matches");
+  revalidatePath("/especiales");
+  revalidatePath("/fixture");
 
   if (currentMatch) {
-    revalidatePath(`/matches/${currentMatch.id}`);
+    revalidatePath(`/fixture/${currentMatch.id}`);
   }
 
   return { success: "All-In eliminado." };

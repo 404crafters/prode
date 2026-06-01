@@ -33,7 +33,7 @@ CREATE TABLE "match_predictions" (
 --> statement-breakpoint
 CREATE TABLE "matches" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"api_football_fixture_id" integer NOT NULL,
+	"external_fixture_id" integer NOT NULL,
 	"stage" "match_stage" DEFAULT 'unknown' NOT NULL,
 	"round_name" text,
 	"group_id" uuid,
@@ -92,7 +92,7 @@ CREATE TABLE "sync_runs" (
 --> statement-breakpoint
 CREATE TABLE "teams" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"api_football_team_id" integer,
+	"external_team_id" integer,
 	"name" text NOT NULL,
 	"country_code" text,
 	"flag_url" text,
@@ -121,7 +121,7 @@ ALTER TABLE "standings" ADD CONSTRAINT "standings_group_id_groups_id_fk" FOREIGN
 ALTER TABLE "standings" ADD CONSTRAINT "standings_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_all_ins" ADD CONSTRAINT "user_all_ins_match_id_matches_id_fk" FOREIGN KEY ("match_id") REFERENCES "public"."matches"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "match_predictions_username_match_idx" ON "match_predictions" USING btree ("username","match_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "matches_api_football_fixture_id_idx" ON "matches" USING btree ("api_football_fixture_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "matches_external_fixture_id_idx" ON "matches" USING btree ("external_fixture_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "special_predictions_username_type_scope_idx" ON "special_predictions" USING btree ("username","type","scope_key");--> statement-breakpoint
 CREATE UNIQUE INDEX "standings_group_team_idx" ON "standings" USING btree ("group_id","team_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "teams_api_football_team_id_idx" ON "teams" USING btree ("api_football_team_id");
+CREATE UNIQUE INDEX "teams_external_team_id_idx" ON "teams" USING btree ("external_team_id");

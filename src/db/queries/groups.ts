@@ -9,11 +9,17 @@ export type GroupView = {
   teams: {
     id: string;
     name: string;
+    flagUrl: string | null;
     seed: number | null;
     standing: {
       rank: number;
       points: number | null;
       played: number | null;
+      won: number | null;
+      drawn: number | null;
+      lost: number | null;
+      goalsFor: number | null;
+      goalsAgainst: number | null;
       goalDifference: number | null;
     } | null;
   }[];
@@ -43,12 +49,18 @@ export async function getGroupsView(): Promise<GroupView[]> {
           ? {
               id: team.id,
               name: team.name,
+              flagUrl: team.flagUrl,
               seed: entry.positionSeed,
               standing: standing
                 ? {
                     rank: standing.rank,
                     points: standing.points,
                     played: standing.played,
+                    won: standing.won,
+                    drawn: standing.drawn,
+                    lost: standing.lost,
+                    goalsFor: standing.goalsFor,
+                    goalsAgainst: standing.goalsAgainst,
                     goalDifference: standing.goalDifference,
                   }
                 : null,

@@ -130,7 +130,7 @@ async function seedTournamentSkeleton(scenario: ScenarioName): Promise<SeedConte
     .insert(teams)
     .values(
       teamNames.map((name, index) => ({
-        apiFootballTeamId: 1000 + index,
+        externalTeamId: 1000 + index,
         name,
         countryCode: name.slice(0, 3).toUpperCase(),
       })),
@@ -198,7 +198,7 @@ function buildGroupMatches(
       matchIndex += 1;
 
       return {
-        apiFootballFixtureId: fixtureId++,
+        externalFixtureId: fixtureId++,
         stage: "group" as const,
         roundName: `Group ${group.code}`,
         groupId: group.id,
@@ -249,7 +249,7 @@ function buildKnockoutMatches(insertedTeams: Team[], scenario: ScenarioName) {
       knockoutIndex += 1;
 
       return {
-        apiFootballFixtureId: fixtureId++,
+        externalFixtureId: fixtureId++,
         stage: definition.stage,
         roundName: getStageLabel(definition.stage),
         groupId: null,

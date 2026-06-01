@@ -6,7 +6,7 @@ import { saveSpecialPredictionAction, type SaveSpecialState } from "./actions";
 type SpecialFormProps = {
   type: "group_winner" | "negative_surprise" | "champion" | "runner_up" | "third_place";
   groupId?: string;
-  options: { id: string; name: string }[];
+  options: { id: string; name: string; flagUrl?: string | null }[];
   defaultTeamId: string | null;
   disabled: boolean;
   submitLabel: string;

@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:reset-dev": "tsx src/db/reset-dev.ts",
     "db:seed": "tsx src/db/seeds/run.ts",
     "db:seed:pre-worldcup": "tsx src/db/seeds/run.ts pre-worldcup",
     "db:seed:group-stage-day-1": "tsx src/db/seeds/run.ts group-stage-day-1",
@@ -19,7 +20,7 @@
     "db:seed:knockouts-start": "tsx src/db/seeds/run.ts knockouts-start",
     "db:seed:knockouts-mid": "tsx src/db/seeds/run.ts knockouts-mid",
     "db:seed:finished-worldcup": "tsx src/db/seeds/run.ts finished-worldcup",
-    "sync:api-football": "tsx src/integrations/api-football/run-sync.ts"
+    "sync:football-data": "tsx src/integrations/football-data/run-sync.ts"
   },
   "dependencies": {
     "date-fns": "^4.3.0",

@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { TeamLabel } from "@/components/team/team-label";
 import { SetupWarning } from "@/components/ui/setup-warning";
 import { getAllInView } from "@/db/queries/all-in";
 import { getSpecialsView } from "@/db/queries/specials";
@@ -96,8 +97,8 @@ export default async function SpecialsPage() {
                     />
                     <SpecialResult
                       points={group.points}
-                      result={group.resultTeamName ?? "Pendiente"}
-                      selected={group.selectedTeamName ?? "Sin cargar"}
+                      result={{ name: group.resultTeamName ?? "Pendiente", flagUrl: group.resultTeamFlagUrl }}
+                      selected={{ name: group.selectedTeamName ?? "Sin cargar", flagUrl: group.selectedTeamFlagUrl }}
                     />
                   </div>
                 ))}
@@ -124,8 +125,11 @@ export default async function SpecialsPage() {
                 />
                 <SpecialResult
                   points={result.value.negativeSurprise.points}
-                  result={result.value.negativeSurprise.resultLabel}
-                  selected={result.value.negativeSurprise.selectedTeamName ?? "Sin cargar"}
+                  result={{ name: result.value.negativeSurprise.resultLabel, flagUrl: null }}
+                  selected={{
+                    name: result.value.negativeSurprise.selectedTeamName ?? "Sin cargar",
+                    flagUrl: result.value.negativeSurprise.selectedTeamFlagUrl,
+                  }}
                 />
               </div>
             </section>
@@ -152,8 +156,14 @@ export default async function SpecialsPage() {
                   />
                   <SpecialResult
                     points={result.value.podio.champion.points}
-                    result={result.value.podio.champion.resultTeamName ?? "Pendiente"}
-                    selected={result.value.podio.champion.selectedTeamName ?? "Sin cargar"}
+                    result={{
+                      name: result.value.podio.champion.resultTeamName ?? "Pendiente",
+                      flagUrl: result.value.podio.champion.resultTeamFlagUrl,
+                    }}
+                    selected={{
+                      name: result.value.podio.champion.selectedTeamName ?? "Sin cargar",
+                      flagUrl: result.value.podio.champion.selectedTeamFlagUrl,
+                    }}
                   />
                 </div>
                 <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
@@ -167,8 +177,14 @@ export default async function SpecialsPage() {
                   />
                   <SpecialResult
                     points={result.value.podio.runnerUp.points}
-                    result={result.value.podio.runnerUp.resultTeamName ?? "Pendiente"}
-                    selected={result.value.podio.runnerUp.selectedTeamName ?? "Sin cargar"}
+                    result={{
+                      name: result.value.podio.runnerUp.resultTeamName ?? "Pendiente",
+                      flagUrl: result.value.podio.runnerUp.resultTeamFlagUrl,
+                    }}
+                    selected={{
+                      name: result.value.podio.runnerUp.selectedTeamName ?? "Sin cargar",
+                      flagUrl: result.value.podio.runnerUp.selectedTeamFlagUrl,
+                    }}
                   />
                 </div>
                 <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
@@ -182,8 +198,14 @@ export default async function SpecialsPage() {
                   />
                   <SpecialResult
                     points={result.value.podio.thirdPlace.points}
-                    result={result.value.podio.thirdPlace.resultTeamName ?? "Pendiente"}
-                    selected={result.value.podio.thirdPlace.selectedTeamName ?? "Sin cargar"}
+                    result={{
+                      name: result.value.podio.thirdPlace.resultTeamName ?? "Pendiente",
+                      flagUrl: result.value.podio.thirdPlace.resultTeamFlagUrl,
+                    }}
+                    selected={{
+                      name: result.value.podio.thirdPlace.selectedTeamName ?? "Sin cargar",
+                      flagUrl: result.value.podio.thirdPlace.selectedTeamFlagUrl,
+                    }}
                   />
                 </div>
               </div>
@@ -231,8 +253,8 @@ function SpecialResult({
   selected,
 }: {
   points: number | null;
-  result: string;
-  selected: string;
+  result: { name: string; flagUrl: string | null };
+  selected: { name: string; flagUrl: string | null };
 }) {
   return (
     <div className="mt-3 grid grid-cols-3 gap-2">
@@ -248,11 +270,13 @@ function SpecialResult({
   );
 }
 
-function SpecialMetric({ label, value }: { label: string; value: string }) {
+function SpecialMetric({ label, value }: { label: string; value: { name: string; flagUrl: string | null } }) {
   return (
     <div className="match-metric">
       <span className="match-metric-label">{label}</span>
-      <span className="match-metric-value">{value}</span>
+      <span className="match-metric-value">
+        <TeamLabel flagUrl={value.flagUrl} name={value.name} />
+      </span>
     </div>
   );
 }

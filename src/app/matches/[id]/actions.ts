@@ -87,8 +87,8 @@ export async function saveMatchPredictionAction(
       },
     });
 
-  revalidatePath(`/matches/${match.id}`);
-  revalidatePath("/matches");
+  revalidatePath(`/fixture/${match.id}`);
+  revalidatePath("/fixture");
 
   return { success: "Pronostico guardado." };
 }
@@ -104,7 +104,7 @@ export async function setAllInAction(formData: FormData) {
   const match = await getPredictionMatch(matchId);
 
   if (!match || !isMatchPredictionOpen(match, getNow())) {
-    revalidatePath(`/matches/${matchId}`);
+    revalidatePath(`/fixture/${matchId}`);
     return;
   }
 
@@ -122,7 +122,7 @@ export async function setAllInAction(formData: FormData) {
       .limit(1);
 
     if (currentMatch && !isMatchPredictionOpen(currentMatch, getNow())) {
-      revalidatePath(`/matches/${matchId}`);
+      revalidatePath(`/fixture/${matchId}`);
       return;
     }
   }
@@ -142,6 +142,6 @@ export async function setAllInAction(formData: FormData) {
       },
     });
 
-  revalidatePath(`/matches/${match.id}`);
-  revalidatePath("/matches");
+  revalidatePath(`/fixture/${match.id}`);
+  revalidatePath("/fixture");
 }

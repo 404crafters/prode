@@ -2,12 +2,12 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { findUser } from "@/config/users";
+import { validateUserPassword } from "@/db/queries/users";
 import {
   createSessionToken,
   getSessionMaxAgeSeconds,
   SESSION_COOKIE_NAME,
-} from "@/lib/auth";
+} from "@/lib/session";
 
 export type LoginState = {
   error?: string;
@@ -18,9 +18,9 @@ export async function loginAction(state: LoginState, formData: FormData): Promis
 
   const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const user = findUser(username);
+  const user = await validateUserPassword(username, password);
 
-  if (!user || user.password !== password) {
+  if (!user) {
     return { error: "Usuario o contrasena invalidos." };
   }
 

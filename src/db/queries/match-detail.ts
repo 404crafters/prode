@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import { users } from "@/config/users";
 import { db } from "@/db/client";
 import { matches, matchPredictions, teams, userAllIns } from "@/db/schema";
 import { areMatchPredictionsVisible, getMatchPredictionDeadline, isMatchPredictionOpen } from "@/domain/deadlines";
@@ -10,13 +9,14 @@ import {
   getGroupMatchScoreBreakdown,
   getKnockoutMatchScoreBreakdown,
 } from "@/domain/scoring";
+import { getActiveUsers } from "./users";
 
 export type MatchDetail = {
   id: string;
   stage: string;
   roundName: string | null;
-  homeTeam: { id: string; name: string } | null;
-  awayTeam: { id: string; name: string } | null;
+  homeTeam: { id: string; name: string; flagUrl: string | null } | null;
+  awayTeam: { id: string; name: string; flagUrl: string | null } | null;
   kickoffLabel: string;
   deadlineLabel: string;
   status: string;
@@ -24,6 +24,7 @@ export type MatchDetail = {
   awayGoals: number | null;
   winnerTeamId: string | null;
   winnerTeamName: string | null;
+  winnerTeamFlagUrl: string | null;
   isPredictionOpen: boolean;
   arePredictionsVisible: boolean;
   isAllIn: boolean;
@@ -33,6 +34,7 @@ export type MatchDetail = {
     awayGoals: number;
     predictedWinnerTeamId: string | null;
     predictedWinnerTeamName: string | null;
+    predictedWinnerTeamFlagUrl: string | null;
     scoreLabel: string | null;
     basePoints: number | null;
     finalPoints: number | null;
@@ -44,6 +46,7 @@ export type MatchDetail = {
     homeGoals: number | null;
     awayGoals: number | null;
     predictedWinnerTeamName: string | null;
+    predictedWinnerTeamFlagUrl: string | null;
     scoreLabel: string | null;
     basePoints: number | null;
     finalPoints: number | null;
@@ -58,9 +61,10 @@ export async function getMatchDetail(matchId: string, username: string): Promise
     return null;
   }
 
-  const [teamRows, predictionRows] = await Promise.all([
+  const [teamRows, predictionRows, userRows] = await Promise.all([
     db.select().from(teams),
     db.select().from(matchPredictions).where(eq(matchPredictions.matchId, match.id)),
+    getActiveUsers(),
   ]);
   const allInRows = await db.select().from(userAllIns);
   const ownAllIn = allInRows.find((row) => row.username === username) ?? null;
@@ -87,12 +91,14 @@ export async function getMatchDetail(matchId: string, username: string): Promise
       ? {
           id: match.homeTeamId,
           name: teamsById.get(match.homeTeamId)?.name ?? "TBD",
+          flagUrl: teamsById.get(match.homeTeamId)?.flagUrl ?? null,
         }
       : null,
     awayTeam: match.awayTeamId
       ? {
           id: match.awayTeamId,
           name: teamsById.get(match.awayTeamId)?.name ?? "TBD",
+          flagUrl: teamsById.get(match.awayTeamId)?.flagUrl ?? null,
         }
       : null,
     kickoffLabel: formatArgentinaDateTime(match.kickoffAt),
@@ -102,6 +108,7 @@ export async function getMatchDetail(matchId: string, username: string): Promise
     awayGoals: match.awayGoals,
     winnerTeamId: match.winnerTeamId,
     winnerTeamName: match.winnerTeamId ? (teamsById.get(match.winnerTeamId)?.name ?? null) : null,
+    winnerTeamFlagUrl: match.winnerTeamId ? (teamsById.get(match.winnerTeamId)?.flagUrl ?? null) : null,
     isPredictionOpen: isMatchPredictionOpen(match, now),
     arePredictionsVisible: visible,
     isAllIn: ownIsAllIn,
@@ -114,6 +121,9 @@ export async function getMatchDetail(matchId: string, username: string): Promise
           predictedWinnerTeamName: ownPrediction.predictedWinnerTeamId
             ? (teamsById.get(ownPrediction.predictedWinnerTeamId)?.name ?? null)
             : null,
+          predictedWinnerTeamFlagUrl: ownPrediction.predictedWinnerTeamId
+            ? (teamsById.get(ownPrediction.predictedWinnerTeamId)?.flagUrl ?? null)
+            : null,
           scoreLabel: ownScore?.label ?? null,
           basePoints: ownScore?.points ?? null,
           finalPoints: ownScore ? applyAllIn(ownScore.points, ownIsAllIn) : null,
@@ -121,7 +131,7 @@ export async function getMatchDetail(matchId: string, username: string): Promise
         }
       : null,
     visiblePredictions: visible
-      ? users.map((user) => {
+      ? userRows.map((user) => {
           const prediction = predictionsByUsername.get(user.username);
           const userAllIn = allInRows.some((row) => row.username === user.username && row.matchId === match.id);
           const score = getScoreForMatch(match, prediction ?? null);
@@ -132,6 +142,9 @@ export async function getMatchDetail(matchId: string, username: string): Promise
             awayGoals: prediction?.awayGoals ?? null,
             predictedWinnerTeamName: prediction?.predictedWinnerTeamId
               ? (teamsById.get(prediction.predictedWinnerTeamId)?.name ?? null)
+              : null,
+            predictedWinnerTeamFlagUrl: prediction?.predictedWinnerTeamId
+              ? (teamsById.get(prediction.predictedWinnerTeamId)?.flagUrl ?? null)
               : null,
             scoreLabel: score?.label ?? null,
             basePoints: score?.points ?? null,

@@ -4,7 +4,7 @@ Este archivo es el backlog vivo del proyecto. Mantenerlo actualizado cuando se a
 
 ## Estado actual
 
-Ultima actualizacion: 2026-05-30
+Ultima actualizacion: 2026-06-01
 
 ## Hecho
 
@@ -24,7 +24,7 @@ Ultima actualizacion: 2026-05-30
   - All-In
   - pronosticos especiales
   - sync runs
-- Login simple con usuarios definidos en `src/config/users.ts`.
+- Login simple con usuarios en DB.
 - Middleware de proteccion de rutas.
 - Logout.
 - Reloj controlado por `SIMULATION_MODE` y `SIMULATION_NOW`.
@@ -77,6 +77,12 @@ Ultima actualizacion: 2026-05-30
 - Pantalla `/groups` con grupos y posiciones.
 - Pantalla `/groups` con links desde grupo a sus partidos.
 - Pantalla `/groups` con links desde equipo a sus partidos.
+- Pantalla `/groups` con tabla completa por grupo:
+  - posicion
+  - PJ/G/E/P
+  - GF/GC/DG
+  - puntos
+  - layout de maximo 2 grupos por fila para evitar scroll horizontal innecesario
 - Pantalla `/specials` con:
   - lideres de grupo
   - sorpresa negativa
@@ -109,11 +115,11 @@ Ultima actualizacion: 2026-05-30
   - `SIMULATION_MODE`
   - `SIMULATION_NOW`
   - comandos utiles de seeds
-- Cliente API-Football.
-- Mapper API-Football.
-- Sync idempotente API-Football.
+- Cliente football-data.org.
+- Mapper football-data.org.
+- Sync idempotente football-data.org.
 - Endpoint cron `/api/cron/sync`.
-- Script `npm run sync:api-football`.
+- Script `npm run sync:football-data`.
 - Criterio de sorpresa negativa protegido contra standings incompletos.
 - Test de standings completos para clasificados/sorpresa negativa.
 - Limpieza de home:
@@ -142,18 +148,162 @@ Ultima actualizacion: 2026-05-30
   - `npm test`
   - `npm run lint`
   - `npm run build`
+- Evaluacion real de football-data.org documentada en `docs/football-data-evaluation.md`:
+  - token validado
+  - 48 equipos disponibles para Mundial 2026
+  - 104 partidos disponibles con rango completo del torneo
+  - headers reales de throttling identificados
+  - criterio de goles sin tanda de penales documentado
+- Sync football-data.org implementado en paralelo:
+  - cliente con `X-Auth-Token`
+  - throttling por headers
+  - mapper de stages/status/penales
+  - upsert de equipos, grupos, membresias, partidos y posiciones
+  - calculo local de posiciones por grupo desde partidos finalizados cuando standings venga plano
+  - script `npm run sync:football-data`
+  - admin y cron apuntando a football-data.org
+- Tests agregados para mapper football-data.org y calculo local de standings.
+- Plan de migracion a football-data.org y deploy Vercel definido en este backlog.
+- Usuarios en DB via `app_users`.
+- Passwords hasheadas con `scrypt`.
+- Bootstrap inicial de admin en migracion:
+  - usuario `admin`
+  - password inicial `admin`
+  - debe cambiarse desde `/admin`
+- `/admin` permite:
+  - alta/actualizacion de usuarios
+  - cambio de password
+  - activar/desactivar usuarios
+- Integracion vieja eliminada.
+- Schema y migracion base usan nombres neutrales:
+  - `teams.external_team_id`
+  - `matches.external_fixture_id`
+- Script protegido para resetear DB dev:
+  - `npm run db:reset-dev`
+  - pide confirmacion interactiva escribiendo `RESET DEV DB`
+  - borra `public` y `drizzle` para que `db:migrate` pueda recrear todo desde cero
+- Sync real football-data.org validado contra Supabase dev:
+  - 48 equipos
+  - 12 grupos
+  - 104 partidos
+  - 48 standings
+  - distribucion de fases esperada
+  - 4 equipos por grupo
+- Banderas/escudos de selecciones renderizadas desde `teams.flag_url`:
+  - home
+  - grupos
+  - listado de partidos
+  - detalle de partido
+  - formulario de pronostico
+  - especiales
+- `next/image` configurado para `crests.football-data.org`.
+- Home ajustada:
+  - sin contadores de equipos/partidos/posiciones
+  - texto sin mencionar fecha simulada
+  - banderas en partidos del proximo cierre
+  - link a agenda
+- Agenda por dia agregada en `/agenda`.
+- Fixture ajustado:
+  - titulo de vista cambiado a "Fixture"
+  - fecha/hora de partido mas visible
+  - eliminatorias ordenadas por filas de instancia
+- Rutas publicas alineadas al contenido de cada pantalla:
+  - `/fixture`
+  - `/fixture/[id]`
+  - `/agenda`
+  - `/grupos`
+  - `/especiales`
+  - `/ranking`
+  - `/admin`
+- Cron Vercel configurado en `vercel.json`:
+  - `/api/cron/sync`
+  - cada 1 hora
+- Endpoint `/api/cron/sync` acepta `Authorization: Bearer $CRON_SECRET`, compatible con Vercel Cron.
+- Usuarios en DB implementados:
+  - tabla `app_users`
+  - login contra DB
+  - passwords con hash `scrypt`
+  - ranking y pronosticos visibles usan usuarios activos de DB
+  - admin puede crear/actualizar usuarios, cambiar passwords y activar/desactivar
 
 ## Bloqueado / externo
 
-- Sync real con API-Football 2026: la API respondio que el plan free no tiene acceso a `season=2026`.
-- Decidir proveedor/API final o plan de API-Football para Mundial 2026.
+- Falta probar sync end-to-end contra Supabase prod.
+- Falta correr verificacion local final luego de migracion de usuarios y agenda:
+  - `npm run db:migrate`
+  - `npm run lint`
+  - `npm test`
+  - `npm run build`
 
 ## Proximo
 
-1. Deploy:
-   - Preparar variables para Vercel.
-   - Agregar `vercel.json` con cron si corresponde.
-   - Documentar setup de Supabase dev/prod.
+### 1. Validacion visual con datos reales en dev
+
+Objetivo: revisar la app con datos reales ya sincronizados en Supabase dev.
+
+- Revisar en UI:
+  - `/groups`
+  - `/matches`
+  - `/agenda`
+  - `/specials`
+  - `/admin`
+- Validar que eliminatorias futuras aparecen como TBD.
+- Validar que los equipos de sorpresa negativa aparecen correctamente.
+- Validar que el admin puede repetir sync sin duplicar registros.
+- Validar alta/cambio de password de usuarios desde `/admin`.
+- Si queda OK, documentar el mismo flujo para Supabase prod.
+
+### 2. Supabase productivo
+
+Objetivo: preparar DB limpia para Vercel.
+
+- Crear proyecto Supabase prod separado del dev.
+- Copiar connection string pooled/transaction para runtime en `DATABASE_URL`.
+- Confirmar connection string directa si Drizzle migrate lo requiere.
+- Ejecutar `npm run db:migrate` contra prod con aprobacion explicita.
+- Ejecutar `npm run sync:football-data` contra prod con aprobacion explicita.
+- No correr seeds en prod.
+- Validar conteos esperados:
+  - 48 equipos
+  - 12 grupos
+  - 104 partidos
+  - standings iniciales por grupo con 4 equipos cada uno y 0 PJ.
+
+### 3. Deploy Vercel
+
+Objetivo: publicar una version usable con sync automatico.
+
+- Crear proyecto Vercel conectado al repo.
+- Configurar env vars:
+  - `DATABASE_URL`
+  - `SESSION_SECRET`
+  - `CRON_SECRET`
+  - `FOOTBALL_DATA_API_TOKEN`
+  - `FOOTBALL_DATA_BASE_URL`
+  - `FOOTBALL_DATA_COMPETITION`
+  - `FOOTBALL_DATA_SEASON`
+  - `SIMULATION_MODE=false`
+- Definir frecuencia de cron:
+  - base recomendada: cada 1 hora.
+  - durante dias con partidos: bajar a cada 15 o 30 minutos solo si el plan de Vercel y el cupo de football-data.org lo permiten.
+  - despues del Mundial: apagar o dejar diario.
+- Proteger `/api/cron/sync` con `CRON_SECRET`.
+- Probar deploy preview y luego produccion.
+
+### 4. Checklist pre-lanzamiento
+
+- Validar login con todos los usuarios reales.
+- Validar que admin pueda sincronizar.
+- Validar home, partidos, grupos, especiales y ranking con DB real.
+- Validar deadlines con horario Argentina.
+- Validar que `SIMULATION_MODE=false` en produccion.
+- Validar que el fixture real no deja equipos `TBD` en fase de grupos.
+- Validar que eliminatorias futuras aparecen aunque no tengan equipos.
+- Documentar comandos operativos:
+  - sync manual
+  - migraciones
+  - rollback simple
+  - rotacion de passwords si hiciera falta
 
 ## Pendiente post-MVP / hardening
 
@@ -170,7 +320,10 @@ Ultima actualizacion: 2026-05-30
 npm test
 npm run lint
 npm run build
+npm run db:reset-dev
 npm run db:migrate
+npm run sync:football-data
 npm run db:seed:group-stage-mid
 npm run dev -- --port 3001
 ```
+

@@ -26,10 +26,17 @@ export type DashboardSummary = {
     label: string;
     href: string;
     kind: "match" | "all-in" | "special";
+    homeTeamName?: string;
+    homeTeamFlagUrl?: string | null;
+    awayTeamName?: string;
+    awayTeamFlagUrl?: string | null;
   }[];
   todayMatches: {
     id: string;
-    label: string;
+    homeTeamName: string;
+    homeTeamFlagUrl: string | null;
+    awayTeamName: string;
+    awayTeamFlagUrl: string | null;
     kickoffLabel: string;
     status: string;
     resultLabel: string;
@@ -52,7 +59,7 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
     db.select().from(teams),
   ]);
 
-  const teamsById = new Map(teamRows.map((team) => [team.id, team.name]));
+  const teamsById = new Map(teamRows.map((team) => [team.id, team]));
   const candidates: { label: string; deadline: Date; missingItems: DashboardSummary["missingItems"] }[] = [];
   const predictionsByMatchId = new Set(predictionRows.map((prediction) => prediction.matchId));
   const specialKeys = new Set(
@@ -71,15 +78,19 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
       .filter((match) => !predictionsByMatchId.has(match.id))
       .slice(0, 6)
       .map((match) => ({
-        label: `Pronosticar ${getMatchLabel(match, teamsById)}`,
-        href: `/matches/${match.id}`,
+        label: "Pronosticar",
+        href: `/fixture/${match.id}`,
         kind: "match",
+        homeTeamName: getTeamName(match.homeTeamId, teamsById),
+        homeTeamFlagUrl: getTeamFlagUrl(match.homeTeamId, teamsById),
+        awayTeamName: getTeamName(match.awayTeamId, teamsById),
+        awayTeamFlagUrl: getTeamFlagUrl(match.awayTeamId, teamsById),
       }));
 
     if (allInRows.length === 0) {
       missingItems.push({
         label: "Elegir All-In",
-        href: "/matches?filter=open",
+        href: "/fixture?filter=open",
         kind: "all-in",
       });
     }
@@ -102,7 +113,7 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
     if (missingGroupWinners > 0) {
       missingItems.push({
         label: `Elegir ${missingGroupWinners} lideres de grupo`,
-        href: "/specials",
+        href: "/especiales",
         kind: "special",
       });
     }
@@ -110,7 +121,7 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
     if (!specialKeys.has("negative_surprise:global")) {
       missingItems.push({
         label: "Elegir sorpresa negativa",
-        href: "/specials",
+        href: "/especiales",
         kind: "special",
       });
     }
@@ -128,15 +139,15 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
     const missingItems: DashboardSummary["missingItems"] = [];
 
     if (!specialKeys.has("champion:global")) {
-      missingItems.push({ label: "Elegir campeon", href: "/specials", kind: "special" });
+      missingItems.push({ label: "Elegir campeon", href: "/especiales", kind: "special" });
     }
 
     if (!specialKeys.has("runner_up:global")) {
-      missingItems.push({ label: "Elegir subcampeon", href: "/specials", kind: "special" });
+      missingItems.push({ label: "Elegir subcampeon", href: "/especiales", kind: "special" });
     }
 
     if (!specialKeys.has("third_place:global")) {
-      missingItems.push({ label: "Elegir tercer puesto", href: "/specials", kind: "special" });
+      missingItems.push({ label: "Elegir tercer puesto", href: "/especiales", kind: "special" });
     }
 
     candidates.push({
@@ -165,7 +176,10 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
       .sort((a, b) => a.kickoffAt.getTime() - b.kickoffAt.getTime())
       .map((match) => ({
         id: match.id,
-        label: getMatchLabel(match, teamsById),
+        homeTeamName: getTeamName(match.homeTeamId, teamsById),
+        homeTeamFlagUrl: getTeamFlagUrl(match.homeTeamId, teamsById),
+        awayTeamName: getTeamName(match.awayTeamId, teamsById),
+        awayTeamFlagUrl: getTeamFlagUrl(match.awayTeamId, teamsById),
         kickoffLabel: formatArgentinaDateTime(match.kickoffAt),
         status: match.status,
         resultLabel:
@@ -183,8 +197,16 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
   };
 }
 
-function getMatchLabel(match: (typeof matches.$inferSelect), teamsById: Map<string, string>) {
-  const homeName = match.homeTeamId ? (teamsById.get(match.homeTeamId) ?? "TBD") : "TBD";
-  const awayName = match.awayTeamId ? (teamsById.get(match.awayTeamId) ?? "TBD") : "TBD";
+function getMatchLabel(match: (typeof matches.$inferSelect), teamsById: Map<string, typeof teams.$inferSelect>) {
+  const homeName = getTeamName(match.homeTeamId, teamsById);
+  const awayName = getTeamName(match.awayTeamId, teamsById);
   return `${homeName} vs ${awayName}`;
+}
+
+function getTeamName(teamId: string | null, teamsById: Map<string, typeof teams.$inferSelect>) {
+  return teamId ? (teamsById.get(teamId)?.name ?? "TBD") : "TBD";
+}
+
+function getTeamFlagUrl(teamId: string | null, teamsById: Map<string, typeof teams.$inferSelect>) {
+  return teamId ? (teamsById.get(teamId)?.flagUrl ?? null) : null;
 }

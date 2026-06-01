@@ -10,21 +10,21 @@ Stack elegido:
 - Drizzle ORM para schema, queries y migraciones.
 - Tailwind CSS.
 - shadcn/ui para componentes.
-- API-Football como proveedor externo de fixture, equipos, standings y resultados.
+- football-data.org como proveedor externo de fixture, equipos, standings y resultados.
 - Vercel para deploy.
 - Vercel Cron para sincronizacion automatica.
 
 Autenticacion:
 
 - Sesion propia simple basada en cookie.
-- Usuarios definidos en archivo de configuracion.
+- Usuarios administrados en DB con passwords hasheadas.
 - Passwords en texto plano por decision de alcance.
 - No se usa Supabase Auth.
 
 Principio central:
 
-- El frontend nunca consulta API-Football.
-- API-Football solo se consume desde backend/server actions/API routes/jobs.
+- El frontend nunca consulta football-data.org.
+- football-data.org solo se consume desde backend/server actions/API routes/jobs.
 - La app lee y calcula desde Supabase Postgres.
 
 ## 2. Arquitectura
@@ -54,7 +54,7 @@ db:
 
 integrations:
 
-- Cliente API-Football.
+- Cliente football-data.org.
 - Mapeo de datos externos a modelo interno.
 - Jobs de sincronizacion.
 
@@ -102,7 +102,7 @@ src/
     ranking.ts
     standings.ts
   integrations/
-    api-football/
+    football-data/
       client.ts
       mapper.ts
       sync.ts
@@ -129,7 +129,7 @@ Representa una seleccion.
 Campos:
 
 - id: uuid interno.
-- apiFootballTeamId: integer unico nullable.
+- externalTeamId: integer unico nullable.
 - name: text.
 - countryCode: text nullable.
 - flagUrl: text nullable.
@@ -138,7 +138,7 @@ Campos:
 
 Notas:
 
-- `apiFootballTeamId` debe ser unico cuando exista.
+- `externalTeamId` debe ser unico cuando exista.
 - El nombre se actualiza por sync.
 
 #### groups
@@ -175,7 +175,7 @@ Representa un partido.
 Campos:
 
 - id: uuid.
-- apiFootballFixtureId: integer unico.
+- externalFixtureId: integer unico.
 - stage: enum.
 - roundName: text nullable.
 - groupId: uuid nullable.
@@ -456,14 +456,14 @@ Orden:
 5. Si goles exactos y ganador final incorrecto, 1.
 6. Caso contrario, 0.
 
-## 6. Sincronizacion API-Football
+## 6. Sincronizacion football-data.org
 
 ### 6.1 Variables de entorno
 
 Variables esperadas:
 
-- `API_FOOTBALL_KEY`
-- `API_FOOTBALL_BASE_URL`
+- `FOOTBALL_DATA_API_TOKEN`
+- `FOOTBALL_DATA_BASE_URL`
 - `DATABASE_URL`
 - `SESSION_SECRET`
 - `CRON_SECRET`
@@ -735,7 +735,7 @@ Tareas:
 - Crear guard de rutas.
 - Implementar rol admin.
 
-### Fase 4 - Sync API-Football
+### Fase 4 - Sync football-data.org
 
 Objetivo:
 
@@ -743,7 +743,7 @@ Objetivo:
 
 Tareas:
 
-- Crear cliente API-Football.
+- Crear cliente football-data.org.
 - Crear mapper.
 - Crear sync idempotente.
 - Crear `sync_runs`.
@@ -829,7 +829,7 @@ Tareas:
 2. Drizzle schema + migracion inicial.
 3. Dominio: fechas, deadlines y scoring.
 4. Auth simple.
-5. Sync API-Football.
+5. Sync football-data.org.
 6. Pantallas de lectura: home basica, calendario, grupos.
 7. Pronosticos de partidos.
 8. All-In.
@@ -840,7 +840,7 @@ Tareas:
 
 ## 12. Riesgos
 
-API-Football no trae un dato esperado:
+football-data.org no trae un dato esperado:
 
 - Mitigacion: guardar rawData y mostrar diagnostico admin.
 
@@ -856,7 +856,7 @@ Timezone:
 
 - Mitigacion: encapsular toda logica de cierre en `domain/deadlines.ts` y testearla.
 
-Passwords planas:
+Passwords hasheadas:
 
 - Riesgo aceptado por alcance.
 - Mitigacion minima: no reutilizar contraseñas reales.
@@ -891,7 +891,7 @@ El MVP esta listo cuando:
 
 Simulation mode permite probar la app antes del Mundial con datos controlados y un reloj configurable.
 
-No reemplaza la sincronizacion real con API-Football. Es una herramienta de desarrollo y staging para validar reglas, UI, cierres, visibilidad, All-In, especiales y ranking.
+No reemplaza la sincronizacion real con football-data.org. Es una herramienta de desarrollo y staging para validar reglas, UI, cierres, visibilidad, All-In, especiales y ranking.
 
 ### 14.1 Alcance
 
@@ -900,12 +900,12 @@ Incluido:
 - Setear fecha y hora actual por variables de entorno.
 - Cargar seeds versionados desde comandos.
 - Simular distintos momentos del Mundial.
-- Probar la app completa sin depender de API-Football.
+- Probar la app completa sin depender de football-data.org.
 
 No incluido:
 
 - Mockoon.
-- Mock HTTP de API-Football.
+- Mock HTTP de football-data.org.
 - Simulador visual complejo.
 - Edicion de resultados desde UI.
 
@@ -1070,3 +1070,5 @@ Tests necesarios:
 - Falla si simulation mode esta activo sin fecha.
 - Deadlines usan `getNow()` o reciben `now` inyectado.
 - No hay uso directo de `new Date()` en modulos de dominio, salvo helpers de clock/date.
+
+

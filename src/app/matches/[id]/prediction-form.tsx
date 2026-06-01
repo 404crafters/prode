@@ -2,13 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useActionState } from "react";
+import { TeamLabel } from "@/components/team/team-label";
 import { saveMatchPredictionAction, type SavePredictionState } from "./actions";
 
 type PredictionFormProps = {
   matchId: string;
   stage: string;
-  homeTeam: { id: string; name: string } | null;
-  awayTeam: { id: string; name: string } | null;
+  homeTeam: { id: string; name: string; flagUrl: string | null } | null;
+  awayTeam: { id: string; name: string; flagUrl: string | null } | null;
   defaultValue: {
     homeGoals: number;
     awayGoals: number;
@@ -43,7 +44,7 @@ export function PredictionForm({
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          {homeTeam?.name ?? "Local"}
+          <TeamLabel flagUrl={homeTeam?.flagUrl} name={homeTeam?.name ?? "Local"} />
           <input
             className="field-control text-base"
             min={0}
@@ -56,7 +57,7 @@ export function PredictionForm({
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
-          {awayTeam?.name ?? "Visitante"}
+          <TeamLabel flagUrl={awayTeam?.flagUrl} name={awayTeam?.name ?? "Visitante"} />
           <input
             className="field-control text-base"
             min={0}

@@ -20,21 +20,24 @@ export type SpecialsView = {
   groups: {
     id: string;
     code: string;
-    teams: { id: string; name: string }[];
+    teams: TeamOption[];
     selectedTeamId: string | null;
     selectedTeamName: string | null;
+    selectedTeamFlagUrl: string | null;
     resultTeamName: string | null;
+    resultTeamFlagUrl: string | null;
     points: number | null;
   }[];
   negativeSurprise: {
-    options: { id: string; name: string }[];
+    options: TeamOption[];
     selectedTeamId: string | null;
     selectedTeamName: string | null;
+    selectedTeamFlagUrl: string | null;
     resultLabel: string;
     points: number | null;
   };
   podio: {
-    teams: { id: string; name: string }[];
+    teams: TeamOption[];
     champion: PodiumPredictionView;
     runnerUp: PodiumPredictionView;
     thirdPlace: PodiumPredictionView;
@@ -44,9 +47,13 @@ export type SpecialsView = {
 type PodiumPredictionView = {
   selectedTeamId: string | null;
   selectedTeamName: string | null;
+  selectedTeamFlagUrl: string | null;
   resultTeamName: string | null;
+  resultTeamFlagUrl: string | null;
   points: number | null;
 };
+
+type TeamOption = { id: string; name: string; flagUrl: string | null };
 
 export async function getSpecialsView(username: string): Promise<SpecialsView> {
   const now = getNow();
@@ -86,10 +93,12 @@ export async function getSpecialsView(username: string): Promise<SpecialsView> {
           .filter((entry) => entry.groupId === group.id)
           .map((entry) => teamsById.get(entry.teamId))
           .filter((team): team is NonNullable<typeof team> => Boolean(team))
-          .map((team) => ({ id: team.id, name: team.name })),
+          .map(toTeamOption),
         selectedTeamId,
         selectedTeamName: selectedTeamId ? (teamsById.get(selectedTeamId)?.name ?? null) : null,
+        selectedTeamFlagUrl: selectedTeamId ? (teamsById.get(selectedTeamId)?.flagUrl ?? null) : null,
         resultTeamName: resultTeamId ? (teamsById.get(resultTeamId)?.name ?? null) : null,
+        resultTeamFlagUrl: resultTeamId ? (teamsById.get(resultTeamId)?.flagUrl ?? null) : null,
         points: resultTeamId && selectedTeamId ? (resultTeamId === selectedTeamId ? 3 : 0) : null,
       };
     }),
@@ -98,10 +107,14 @@ export async function getSpecialsView(username: string): Promise<SpecialsView> {
         .filter((team) =>
           NEGATIVE_SURPRISE_TEAM_NAMES.some((name) => normalizeName(name) === normalizeName(team.name)),
         )
-        .map((team) => ({ id: team.id, name: team.name })),
+        .map(toTeamOption),
       selectedTeamId:
         predictionsByTypeScope.get("negative_surprise:global")?.teamId ?? null,
       selectedTeamName: getSelectedTeamName(
+        predictionsByTypeScope.get("negative_surprise:global")?.teamId ?? null,
+        teamsById,
+      ),
+      selectedTeamFlagUrl: getSelectedTeamFlagUrl(
         predictionsByTypeScope.get("negative_surprise:global")?.teamId ?? null,
         teamsById,
       ),
@@ -117,7 +130,7 @@ export async function getSpecialsView(username: string): Promise<SpecialsView> {
       ),
     },
     podio: {
-      teams: teamRows.map((team) => ({ id: team.id, name: team.name })),
+      teams: teamRows.map(toTeamOption),
       champion: getPodiumPredictionView(
         predictionsByTypeScope.get("champion:global")?.teamId ?? null,
         podium.championTeamId,
@@ -146,6 +159,14 @@ function normalizeName(name: string): string {
 
 function getSelectedTeamName(teamId: string | null, teamsById: Map<string, typeof teams.$inferSelect>) {
   return teamId ? (teamsById.get(teamId)?.name ?? null) : null;
+}
+
+function getSelectedTeamFlagUrl(teamId: string | null, teamsById: Map<string, typeof teams.$inferSelect>) {
+  return teamId ? (teamsById.get(teamId)?.flagUrl ?? null) : null;
+}
+
+function toTeamOption(team: typeof teams.$inferSelect): TeamOption {
+  return { id: team.id, name: team.name, flagUrl: team.flagUrl };
 }
 
 function getNegativeSurpriseResultLabel(
@@ -182,7 +203,9 @@ function getPodiumPredictionView(
   return {
     selectedTeamId,
     selectedTeamName: getSelectedTeamName(selectedTeamId, teamsById),
+    selectedTeamFlagUrl: getSelectedTeamFlagUrl(selectedTeamId, teamsById),
     resultTeamName: resultTeamId ? (teamsById.get(resultTeamId)?.name ?? null) : null,
+    resultTeamFlagUrl: resultTeamId ? (teamsById.get(resultTeamId)?.flagUrl ?? null) : null,
     points: selectedTeamId && resultTeamId ? (selectedTeamId === resultTeamId ? pointsValue : 0) : null,
   };
 }

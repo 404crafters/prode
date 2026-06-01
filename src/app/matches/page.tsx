@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
+import { TeamLabel } from "@/components/team/team-label";
 import { SetupWarning } from "@/components/ui/setup-warning";
 import { getMatchList, type MatchListItem } from "@/db/queries/matches";
 import { getCurrentUser } from "@/lib/auth";
@@ -36,7 +37,7 @@ export default async function MatchesPage({
         <div className="flex items-end justify-between">
           <div>
             <p className="eyebrow">Fixture</p>
-            <h2 className="mt-1 text-3xl font-semibold">Partidos</h2>
+            <h2 className="mt-1 text-3xl font-semibold">Fixture</h2>
             {contextLabel ? <p className="mt-2 text-sm text-slate-500">{contextLabel}</p> : null}
           </div>
           {result.ok ? <p className="pill bg-white text-slate-700">{visibleMatches.length} partidos</p> : null}
@@ -118,7 +119,7 @@ function MatchSection({
             <div className="soft-card rounded-lg p-4" key={groupCode}>
               <Link
                 className="inline-flex rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-800"
-                href={groupCode === "Sin grupo" ? "/matches" : `/matches?group=${groupCode}`}
+                href={groupCode === "Sin grupo" ? "/fixture" : `/fixture?group=${groupCode}`}
               >
                 {groupCode === "Sin grupo" ? groupCode : `Grupo ${groupCode}`}
               </Link>
@@ -143,12 +144,14 @@ function KnockoutSection({ matches }: { matches: MatchListItem[] }) {
     <section>
       <h3 className="text-xl font-semibold">Fase eliminatoria</h3>
       {matches.length > 0 ? (
-        <div className="mt-3 grid grid-cols-3 gap-3">
+        <div className="mt-3 flex flex-col gap-3">
           {orderedStages.map((stage) => (
             <div className="soft-card rounded-lg p-4" key={stage}>
-              <p className="rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white">{getStageLabel(stage)}</p>
-              <div className="mt-3 flex flex-col gap-2">
-                {(byStage.get(stage) ?? []).map((match) => <MatchCard key={match.id} match={match} compact />)}
+              <p className="inline-flex rounded-md bg-slate-950 px-3 py-1.5 text-sm font-semibold text-white">
+                {getStageLabel(stage)}
+              </p>
+              <div className="mt-3 grid gap-2 lg:grid-cols-2">
+                {(byStage.get(stage) ?? []).map((match) => <MatchCard key={match.id} match={match} />)}
               </div>
             </div>
           ))}
@@ -166,13 +169,13 @@ function MatchCard({ compact = false, match }: { compact?: boolean; match: Match
   return (
     <Link
       className="soft-card-link block rounded-md px-3 py-3"
-      href={`/matches/${match.id}`}
+      href={`/fixture/${match.id}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-medium text-slate-950">
-              {match.homeTeamName ?? "TBD"} vs {match.awayTeamName ?? "TBD"}
+              <MatchupLabel match={match} />
             </p>
             {match.isAllIn ? (
               <span className="pill pill-all-in">
@@ -180,7 +183,9 @@ function MatchCard({ compact = false, match }: { compact?: boolean; match: Match
               </span>
             ) : null}
           </div>
-          <p className="mt-1 text-xs text-slate-500">{match.kickoffLabel}</p>
+          <p className="mt-2 inline-flex rounded-md bg-emerald-400 px-2.5 py-1 text-xs font-bold text-slate-950">
+            {match.kickoffLabel}
+          </p>
         </div>
         <span
           className={
@@ -207,6 +212,16 @@ function MatchCard({ compact = false, match }: { compact?: boolean; match: Match
         </div>
       </div>
     </Link>
+  );
+}
+
+function MatchupLabel({ match }: { match: MatchListItem }) {
+  return (
+    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+      <TeamLabel flagUrl={match.homeTeamFlagUrl} name={match.homeTeamName ?? "TBD"} />
+      <span className="text-slate-500">vs</span>
+      <TeamLabel flagUrl={match.awayTeamFlagUrl} name={match.awayTeamName ?? "TBD"} />
+    </span>
   );
 }
 
@@ -345,7 +360,7 @@ function buildMatchesHref(params: MatchSearchParams) {
   }
 
   const queryString = query.toString();
-  return queryString ? `/matches?${queryString}` : "/matches";
+  return queryString ? `/fixture?${queryString}` : "/fixture";
 }
 
 function groupBy<T>(items: T[], getKey: (item: T) => string) {

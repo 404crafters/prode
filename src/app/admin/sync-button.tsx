@@ -15,7 +15,7 @@ export function SyncButton() {
         disabled={pending}
         type="submit"
       >
-        {pending ? "Sincronizando..." : "Sincronizar API-Football"}
+        {pending ? "Sincronizando..." : "Sincronizar football-data"}
       </button>
       {state.error ? <span className="text-sm font-medium text-red-700">{state.error}</span> : null}
       {state.success ? (

@@ -1,6 +1,6 @@
 import { count, desc } from "drizzle-orm";
 import { db } from "@/db/client";
-import { groups, matches, standings, syncRuns, teams } from "@/db/schema";
+import { appUsers, groups, matches, standings, syncRuns, teams } from "@/db/schema";
 import { formatArgentinaDateTime } from "@/lib/date";
 
 export type AdminSummary = {
@@ -9,6 +9,7 @@ export type AdminSummary = {
     groups: number;
     matches: number;
     standings: number;
+    users: number;
   };
   recentSyncRuns: {
     id: string;
@@ -21,11 +22,12 @@ export type AdminSummary = {
 };
 
 export async function getAdminSummary(): Promise<AdminSummary> {
-  const [teamCount, groupCount, matchCount, standingCount, recentSyncRuns] = await Promise.all([
+  const [teamCount, groupCount, matchCount, standingCount, userCount, recentSyncRuns] = await Promise.all([
     db.select({ value: count() }).from(teams),
     db.select({ value: count() }).from(groups),
     db.select({ value: count() }).from(matches),
     db.select({ value: count() }).from(standings),
+    db.select({ value: count() }).from(appUsers),
     db.select().from(syncRuns).orderBy(desc(syncRuns.startedAt)).limit(8),
   ]);
 
@@ -35,6 +37,7 @@ export async function getAdminSummary(): Promise<AdminSummary> {
       groups: groupCount[0]?.value ?? 0,
       matches: matchCount[0]?.value ?? 0,
       standings: standingCount[0]?.value ?? 0,
+      users: userCount[0]?.value ?? 0,
     },
     recentSyncRuns: recentSyncRuns.map((run) => ({
       id: run.id,

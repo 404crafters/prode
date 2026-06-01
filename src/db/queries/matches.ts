@@ -20,6 +20,8 @@ export type MatchListItem = {
   awayTeamId: string | null;
   homeTeamName: string | null;
   awayTeamName: string | null;
+  homeTeamFlagUrl: string | null;
+  awayTeamFlagUrl: string | null;
   kickoffAt: Date;
   kickoffLabel: string;
   deadlineLabel: string;
@@ -38,7 +40,7 @@ export type MatchListItem = {
 export async function getMatchList(username: string): Promise<MatchListItem[]> {
   const now = getNow();
   const [matchRows, teamRows, groupRows, predictionRows, allInRows] = await Promise.all([
-    db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.apiFootballFixtureId)),
+    db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.externalFixtureId)),
     db.select().from(teams),
     db.select().from(groups),
     db.select().from(matchPredictions),
@@ -69,6 +71,8 @@ export async function getMatchList(username: string): Promise<MatchListItem[]> {
       awayTeamId: match.awayTeamId,
       homeTeamName: match.homeTeamId ? (teamsById.get(match.homeTeamId)?.name ?? null) : null,
       awayTeamName: match.awayTeamId ? (teamsById.get(match.awayTeamId)?.name ?? null) : null,
+      homeTeamFlagUrl: match.homeTeamId ? (teamsById.get(match.homeTeamId)?.flagUrl ?? null) : null,
+      awayTeamFlagUrl: match.awayTeamId ? (teamsById.get(match.awayTeamId)?.flagUrl ?? null) : null,
       kickoffAt: match.kickoffAt,
       kickoffLabel: formatArgentinaDateTime(match.kickoffAt),
       deadlineLabel: formatArgentinaDateTime(getMatchPredictionDeadline(match)),

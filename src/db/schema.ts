@@ -1,6 +1,7 @@
 import {
   integer,
   jsonb,
+  boolean,
   pgEnum,
   pgTable,
   primaryKey,
@@ -48,18 +49,28 @@ export const syncRunTypeEnum = pgEnum("sync_run_type", [
 
 export const syncRunStatusEnum = pgEnum("sync_run_status", ["running", "success", "failed"]);
 
+export const appUsers = pgTable("app_users", {
+  username: text("username").primaryKey(),
+  passwordHash: text("password_hash").notNull(),
+  displayName: text("display_name").notNull(),
+  role: text("role").notNull().default("user"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const teams = pgTable(
   "teams",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    apiFootballTeamId: integer("api_football_team_id"),
+    externalTeamId: integer("external_team_id"),
     name: text("name").notNull(),
     countryCode: text("country_code"),
     flagUrl: text("flag_url"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [uniqueIndex("teams_api_football_team_id_idx").on(table.apiFootballTeamId)],
+  (table) => [uniqueIndex("teams_external_team_id_idx").on(table.externalTeamId)],
 );
 
 export const groups = pgTable("groups", {
@@ -89,7 +100,7 @@ export const matches = pgTable(
   "matches",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    apiFootballFixtureId: integer("api_football_fixture_id").notNull(),
+    externalFixtureId: integer("external_fixture_id").notNull(),
     stage: matchStageEnum("stage").notNull().default("unknown"),
     roundName: text("round_name"),
     groupId: uuid("group_id").references(() => groups.id, { onDelete: "set null" }),
@@ -107,7 +118,7 @@ export const matches = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [uniqueIndex("matches_api_football_fixture_id_idx").on(table.apiFootballFixtureId)],
+  (table) => [uniqueIndex("matches_external_fixture_id_idx").on(table.externalFixtureId)],
 );
 
 export const standings = pgTable(
@@ -197,6 +208,7 @@ export const syncRuns = pgTable("sync_runs", {
 });
 
 export type Team = typeof teams.$inferSelect;
+export type AppUserRecord = typeof appUsers.$inferSelect;
 export type Group = typeof groups.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type MatchPredictionRecord = typeof matchPredictions.$inferSelect;
