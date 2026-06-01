@@ -8,18 +8,16 @@ const globalForDb = globalThis as unknown as {
 };
 
 function getPostgresClient(): postgres.Sql {
-  const client =
-    globalForDb.postgresClient ??
-    postgres(requireEnv("DATABASE_URL"), {
+  if (!globalForDb.postgresClient) {
+    globalForDb.postgresClient = postgres(requireEnv("DATABASE_URL"), {
+      idle_timeout: 20,
+      max: 10,
       prepare: false,
       ssl: "require",
     });
-
-  if (process.env.NODE_ENV !== "production") {
-    globalForDb.postgresClient = client;
   }
 
-  return client;
+  return globalForDb.postgresClient;
 }
 
 export async function closeDbConnection() {

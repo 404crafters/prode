@@ -2,24 +2,20 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
 import { TeamLabel } from "@/components/team/team-label";
 import { SetupWarning } from "@/components/ui/setup-warning";
-import { getAdminSummary } from "@/db/queries/admin";
 import { getDashboardSummary } from "@/db/queries/dashboard";
 import { getRanking } from "@/db/queries/ranking";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function Home() {
   const user = await getCurrentUser();
-  const summaryResult = await getSummarySafely();
-  const rankingResult = await getRankingSafely();
-  const dashboardResult = user
-    ? await getDashboardSafely(user.username)
-    : { ok: false as const, error: new Error("Sin sesion") };
+  const [rankingResult, dashboardResult] = await Promise.all([
+    getRankingSafely(),
+    user ? getDashboardSafely(user.username) : Promise.resolve({ ok: false as const, error: new Error("Sin sesion") }),
+  ]);
 
   return (
     <AppShell>
       <div className="grid grid-cols-12 gap-5">
-        {!summaryResult.ok ? <SetupWarning error={summaryResult.error} /> : null}
-
         <section className="surface col-span-12 rounded-lg p-5 lg:col-span-7">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -134,14 +130,6 @@ export default async function Home() {
       </div>
     </AppShell>
   );
-}
-
-async function getSummarySafely() {
-  try {
-    return { ok: true as const, value: await getAdminSummary() };
-  } catch (error) {
-    return { ok: false as const, error };
-  }
 }
 
 function MissingItemLabel({
