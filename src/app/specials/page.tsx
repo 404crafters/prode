@@ -4,6 +4,7 @@ import { getAllInView } from "@/db/queries/all-in";
 import { getSpecialsView } from "@/db/queries/specials";
 import { getCurrentUser } from "@/lib/auth";
 import { AllInPicker } from "../all-in/all-in-picker";
+import { ClearAllInButton } from "../all-in/clear-all-in-button";
 import { SpecialForm } from "./special-form";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +59,9 @@ export default async function SpecialsPage() {
                   ) : (
                     <p className="mt-3 text-sm text-slate-600">Todavia no elegiste All-In.</p>
                   )}
+                  {allInResult.value.current ? (
+                    <ClearAllInButton disabled={!allInResult.value.canMove} />
+                  ) : null}
                 </div>
                 <div className="soft-card rounded-lg p-4">
                   <p className="text-sm font-semibold text-slate-950">Elegir o mover</p>

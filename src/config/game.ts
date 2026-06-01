@@ -3,7 +3,7 @@ export const NEGATIVE_SURPRISE_TEAM_NAMES = [
   "Brasil",
   "Alemania",
   "Francia",
-  "Espana",
+  "España",
   "Inglaterra",
   "Holanda",
 ] as const;

@@ -40,7 +40,7 @@ const teamNames = [
   "Brasil",
   "Alemania",
   "Francia",
-  "Espana",
+  "España",
   "Inglaterra",
   "Holanda",
   "Uruguay",
@@ -245,7 +245,7 @@ function buildKnockoutMatches(insertedTeams: Team[], scenario: ScenarioName) {
 
       const isFinished = knockoutIndex < finishedCount;
       const result = isFinished ? getKnockoutResultForIndex(knockoutIndex) : null;
-      const kickoffAt = buildKickoffDate(definition.firstDateOffset + index);
+      const kickoffAt = buildKickoffDate(definition.firstDateOffset * 4 + index);
       knockoutIndex += 1;
 
       return {
@@ -429,8 +429,8 @@ function getWinnerTeamId(homeTeamId: string, awayTeamId: string, result: { homeG
 
 function getStageLabel(stage: string): string {
   const labels: Record<string, string> = {
-    round_of_32: "32avos",
-    round_of_16: "16avos",
+    round_of_32: "16avos",
+    round_of_16: "Octavos",
     quarter_final: "Cuartos",
     semi_final: "Semifinal",
     third_place: "Tercer puesto",

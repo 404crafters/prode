@@ -89,3 +89,50 @@ export async function saveAllInAction(
 
   return { success: "All-In actualizado." };
 }
+
+export async function deleteAllInAction(
+  state: SaveAllInState,
+  formData: FormData,
+): Promise<SaveAllInState> {
+  void state;
+  void formData;
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return { error: "Tenes que iniciar sesion." };
+  }
+
+  const [currentAllIn] = await db
+    .select()
+    .from(userAllIns)
+    .where(eq(userAllIns.username, user.username))
+    .limit(1);
+
+  if (!currentAllIn) {
+    return { success: "No tenias All-In cargado." };
+  }
+
+  const [currentMatch] = await db
+    .select()
+    .from(matches)
+    .where(eq(matches.id, currentAllIn.matchId))
+    .limit(1);
+
+  if (currentMatch && !isMatchPredictionOpen(currentMatch, getNow())) {
+    return { error: "Tu All-In actual ya quedo bloqueado." };
+  }
+
+  await db.delete(userAllIns).where(eq(userAllIns.username, user.username));
+
+  revalidatePath("/");
+  revalidatePath("/all-in");
+  revalidatePath("/specials");
+  revalidatePath("/matches");
+
+  if (currentMatch) {
+    revalidatePath(`/matches/${currentMatch.id}`);
+  }
+
+  return { success: "All-In eliminado." };
+}

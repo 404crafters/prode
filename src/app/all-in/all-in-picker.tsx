@@ -7,6 +7,7 @@ type AllInPickerProps = {
   matches: {
     id: string;
     label: string;
+    phaseLabel: string;
     kickoffLabel: string;
     deadlineLabel: string;
     isCurrent: boolean;
@@ -18,6 +19,7 @@ const initialState: SaveAllInState = {};
 
 export function AllInPicker({ matches, disabled }: AllInPickerProps) {
   const [state, formAction, pending] = useActionState(saveAllInAction, initialState);
+  const matchesByPhase = groupMatchesByPhase(matches);
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
@@ -29,10 +31,14 @@ export function AllInPicker({ matches, disabled }: AllInPickerProps) {
         required
       >
         <option value="">Seleccionar partido</option>
-        {matches.map((match) => (
-          <option key={match.id} value={match.id}>
-            {match.label} - {match.kickoffLabel}
-          </option>
+        {matchesByPhase.map((phase) => (
+          <optgroup key={phase.label} label={phase.label}>
+            {phase.matches.map((match) => (
+              <option key={match.id} value={match.id}>
+                {match.label} - {match.kickoffLabel}
+              </option>
+            ))}
+          </optgroup>
         ))}
       </select>
 
@@ -48,4 +54,20 @@ export function AllInPicker({ matches, disabled }: AllInPickerProps) {
       </button>
     </form>
   );
+}
+
+function groupMatchesByPhase(matches: AllInPickerProps["matches"]) {
+  const phases: { label: string; matches: AllInPickerProps["matches"] }[] = [];
+
+  for (const match of matches) {
+    const phase = phases.find((candidate) => candidate.label === match.phaseLabel);
+
+    if (phase) {
+      phase.matches.push(match);
+    } else {
+      phases.push({ label: match.phaseLabel, matches: [match] });
+    }
+  }
+
+  return phases;
 }

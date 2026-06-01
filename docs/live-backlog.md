@@ -89,6 +89,9 @@ Ultima actualizacion: 2026-05-30
   - resultado real cuando existe
   - puntos obtenidos cuando ya son puntuables
   - All-In integrado en la misma pantalla
+  - All-In con selector agrupado por fase
+  - All-In permite elegir slots futuros de eliminatorias aunque todavia sean TBD
+  - All-In se puede quitar mientras no este bloqueado
 - Pantalla `/ranking` con:
   - posiciones
   - puntos por partidos
@@ -130,6 +133,11 @@ Ultima actualizacion: 2026-05-30
   - fondo, superficies y tarjetas oscuras
   - textos, bordes, tablas e inputs ajustados para contraste
   - overrides globales para evitar restos de light mode en utilities existentes
+- Seeds ajustados:
+  - `España` con ñ
+  - primera fase eliminatoria etiquetada como `16avos`
+  - `Octavos` para `round_of_16`
+  - fechas de eliminatorias ordenadas despues de fase de grupos
 - Verificaciones actuales:
   - `npm test`
   - `npm run lint`
