@@ -61,6 +61,25 @@ docker-compose up -d --build app traefik
 
 Esta configuracion evita features de Compose v2 y usa tags de imagenes mas conservadores para mejorar compatibilidad con `docker-compose` v1.
 
+Si el server tiene un Docker daemon viejo y aparece un error como:
+
+```txt
+client version 1.52 is too new. Maximum supported API version is 1.40
+```
+
+ejecutar los comandos forzando la version de API y apagando BuildKit:
+
+```bash
+sudo env DOCKER_API_VERSION=1.40 DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker-compose up -d --build app traefik
+```
+
+Para migraciones/sync:
+
+```bash
+sudo env DOCKER_API_VERSION=1.40 DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker-compose run --rm migrate
+sudo env DOCKER_API_VERSION=1.40 DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker-compose run --rm sync-once
+```
+
 ## Cron recomendado
 
 Conviene usar cron del host pegándole al endpoint HTTP protegido, no `docker exec`.

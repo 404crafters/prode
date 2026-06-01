@@ -229,6 +229,7 @@ Ultima actualizacion: 2026-06-01
   - servicios operativos `migrate` y `sync-once`
   - `.env.production.example` como plantilla para crear `.env` con variables de la app
   - comandos documentados con `docker-compose` v1 por compatibilidad del server
+  - workaround documentado para Docker daemon viejo (`DOCKER_API_VERSION=1.40`, BuildKit off)
   - guia en `docs/deployment-docker.md`
 
 ## Bloqueado / externo
