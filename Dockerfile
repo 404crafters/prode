@@ -1,4 +1,15 @@
-FROM node:20.19.6-alpine3.21 AS base
+FROM debian:bullseye-slim AS node-base
+ENV NODE_VERSION=20.19.6
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl xz-utils \
+  && rm -rf /var/lib/apt/lists/* \
+  && curl -fsSLO "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
+  && tar -xJf "node-v${NODE_VERSION}-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
+  && rm "node-v${NODE_VERSION}-linux-x64.tar.xz" \
+  && node --version \
+  && npm --version
+
+FROM node-base AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -20,7 +31,7 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
-RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
+RUN groupadd --system nodejs && useradd --system --gid nodejs --home-dir /app nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

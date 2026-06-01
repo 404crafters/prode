@@ -224,7 +224,7 @@ Ultima actualizacion: 2026-06-01
   - admin puede crear/actualizar usuarios, cambiar passwords y activar/desactivar
 - Deploy Docker preparado:
   - `Dockerfile` multi-stage con Next standalone
-  - imagen base Node 20.19.x para cumplir engines del toolchain
+  - imagen base Debian conservadora con Node 20.19.x instalado desde tarball oficial para evitar manifests OCI de `node:*`
   - `docker-compose.yml` con Traefik y HTTPS automatico via Let's Encrypt
   - dominio y email ACME definidos directamente en `docker-compose.yml`
   - servicios operativos `migrate` y `sync-once`
@@ -232,6 +232,11 @@ Ultima actualizacion: 2026-06-01
   - comandos documentados con `docker-compose` v1 por compatibilidad del server
   - workaround documentado para Docker daemon viejo (`DOCKER_API_VERSION=1.40`, BuildKit off)
   - guia en `docs/deployment-docker.md`
+- Deploy Vercel documentado:
+  - sin `output: "standalone"` en Next config
+  - app en Vercel
+  - sync horario con cron externo via `curl`
+  - guia en `docs/deployment-vercel.md`
 
 ## Bloqueado / externo
 
@@ -276,23 +281,24 @@ Objetivo: preparar DB limpia para produccion.
   - 104 partidos
   - standings iniciales por grupo con 4 equipos cada uno y 0 PJ.
 
-### 3. Deploy Docker
+### 3. Deploy Vercel
 
-Objetivo: publicar una version usable con Docker y Traefik.
+Objetivo: publicar una version usable en Vercel con sync automatico externo.
 
-- Preparar server privado:
-  - Docker
-  - docker-compose
-  - puertos 80/443 abiertos
-  - DNS del dominio apuntando al server
-- Crear `.env.production` desde `.env.production.example`.
-- Ejecutar migracion inicial:
-  - `docker-compose run --rm migrate`
-- Ejecutar sync inicial:
-  - `docker-compose run --rm sync-once`
-- Levantar app y Traefik:
-  - `docker-compose up -d --build app traefik`
-- Configurar cron del host contra `/api/cron/sync`:
+- Crear proyecto Vercel conectado al repo.
+- Configurar env vars de Production:
+  - `DATABASE_URL`
+  - `SESSION_SECRET`
+  - `CRON_SECRET`
+  - `FOOTBALL_DATA_API_TOKEN`
+  - `FOOTBALL_DATA_BASE_URL`
+  - `FOOTBALL_DATA_COMPETITION`
+  - `FOOTBALL_DATA_SEASON`
+  - `SIMULATION_MODE=false`
+- No configurar `SIMULATION_NOW` en produccion.
+- Ejecutar `npm run db:migrate` contra Supabase prod.
+- Ejecutar `npm run sync:football-data` contra Supabase prod.
+- Configurar cron externo contra `/api/cron/sync`:
   - base recomendada: cada 1 hora.
   - durante dias con partidos: bajar a cada 15 o 30 minutos solo si el cupo de football-data.org lo permite.
   - despues del Mundial: apagar o dejar diario.

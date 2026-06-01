@@ -3,7 +3,7 @@
 ## Archivos
 
 - `Dockerfile`: build multi-stage. La app corre con `output: "standalone"` de Next.js.
-- La imagen base usa Node 20.19.x porque dependencias del build requieren `^20.19.0`.
+- El Dockerfile usa `debian:bullseye-slim` e instala Node 20.19.x desde tarball oficial. Esto evita depender de imagenes `node:*` modernas que algunos daemons viejos no pueden bajar por manifests OCI.
 - `docker-compose.yml`: levanta Traefik, la app y servicios operativos para migrar/sincronizar. Compatible con `docker-compose` v1.
 - `.env.production.example`: plantilla de variables para el server. Copiarla como `.env`.
 
@@ -60,7 +60,7 @@ docker-compose run --rm sync-once
 docker-compose up -d --build app traefik
 ```
 
-Esta configuracion evita features de Compose v2 y usa tags de imagenes mas conservadores para mejorar compatibilidad con `docker-compose` v1.
+Esta configuracion evita features de Compose v2 y usa imagenes base mas conservadoras para mejorar compatibilidad con `docker-compose` v1 y Docker daemons viejos.
 
 Si el server tiene un Docker daemon viejo y aparece un error como:
 
