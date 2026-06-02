@@ -76,10 +76,12 @@ export async function getSpecialsView(username: string): Promise<SpecialsView> {
   const predictionsByTypeScope = new Map(
     predictionRows.map((prediction) => [`${prediction.type}:${prediction.scopeKey}`, prediction]),
   );
-  const groupWinnerByGroupId = getGroupWinnerTeamIds(standingRows);
   const qualifiedTeamIds = getQualifiedTeamIds(standingRows);
   const podium = getTournamentPodium(matchRows);
   const standingsComplete = areGroupStandingsComplete(standingRows);
+  const groupWinnerByGroupId = standingsComplete
+    ? getGroupWinnerTeamIds(standingRows)
+    : new Map<string, string>();
 
   return {
     worldCupDeadlineLabel: tournamentDeadline ? formatArgentinaDateTime(tournamentDeadline) : null,

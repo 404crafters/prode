@@ -281,6 +281,10 @@ Ultima actualizacion: 2026-06-02
   - criterios de puntos separados entre fase de grupos y eliminatorias
   - copy alineado con la etiqueta "Full" usada en la UI
   - badges de puntos consistentes tambien en especiales, manteniendo textos largos fuera del chip
+- Especiales ajustado:
+  - lideres de grupo no muestran resultado ni puntos hasta que termine la fase de grupos
+  - ranking tampoco puntua lideres de grupo antes de standings completos
+  - auditado ranking para confirmar que partidos, All-In, sorpresa negativa y podio no suman antes de tener resultado computable
 
 ## Bloqueado / externo
 

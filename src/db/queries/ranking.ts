@@ -150,7 +150,9 @@ async function loadRankingData() {
       predictionRows.map((prediction) => [`${prediction.username}:${prediction.matchId}`, prediction]),
     ),
     allInByUser: new Map(allInRows.map((allIn) => [allIn.username, allIn.matchId])),
-    groupWinnerByGroupId: getGroupWinnerTeamIds(standingRows),
+    groupWinnerByGroupId: standingsComplete
+      ? getGroupWinnerTeamIds(standingRows)
+      : new Map<string, string>(),
     qualifiedTeamIds: getQualifiedTeamIds(standingRows),
     podium: getTournamentPodium(matchRows),
   };
@@ -277,7 +279,7 @@ function calculateSpecialDetails(data: RankingData, username: string): RankingDe
       const winnerTeamId = prediction.groupId
         ? data.groupWinnerByGroupId.get(prediction.groupId)
         : null;
-      const points = winnerTeamId === prediction.teamId ? 3 : 0;
+      const points = data.standingsComplete && winnerTeamId === prediction.teamId ? 3 : 0;
       const groupCode = prediction.groupId
         ? (data.groupsById.get(prediction.groupId)?.code ?? prediction.groupId)
         : "";
