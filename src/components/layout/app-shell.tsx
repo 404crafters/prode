@@ -1,20 +1,18 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/logout/actions";
+import { MainNav, type MainNavItem } from "@/components/layout/main-nav";
 import { getCurrentUser } from "@/lib/auth";
 
-type NavItem = {
-  href: string;
-  label: string;
+type NavItem = MainNavItem & {
   adminOnly?: boolean;
 };
 
 const navItems: NavItem[] = [
   { href: "/", label: "Home" },
-  { href: "/fixture", label: "Fixture" },
+  { href: "/fixture", label: "Fixture", activePathPrefixes: ["/matches"] },
   { href: "/agenda", label: "Agenda" },
-  { href: "/grupos", label: "Grupos" },
-  { href: "/especiales", label: "Especiales" },
+  { href: "/grupos", label: "Grupos", activePathPrefixes: ["/groups"] },
+  { href: "/especiales", label: "Especiales", activePathPrefixes: ["/specials"] },
   { href: "/ranking", label: "Ranking" },
   { href: "/admin", label: "Admin", adminOnly: true },
 ];
@@ -55,20 +53,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <nav className="flex flex-wrap gap-2">
-          {navItems
-            .filter((item) => !item.adminOnly || user.role === "admin")
-            .map((item) => (
-              <Link
-                className="rounded-md border border-slate-700 bg-slate-900/85 px-3 py-2 text-sm font-semibold text-slate-200 shadow-sm hover:border-emerald-400 hover:bg-emerald-950/70 hover:text-emerald-100"
-                href={item.href}
-                key={item.href}
-                prefetch={false}
-              >
-                {item.label}
-              </Link>
-            ))}
-        </nav>
+        <MainNav items={navItems.filter((item) => !item.adminOnly || user.role === "admin")} />
 
         {children}
       </div>

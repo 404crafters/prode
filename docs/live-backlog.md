@@ -4,7 +4,7 @@ Este archivo es el backlog vivo del proyecto. Mantenerlo actualizado cuando se a
 
 ## Estado actual
 
-Ultima actualizacion: 2026-06-01
+Ultima actualizacion: 2026-06-02
 
 ## Hecho
 
@@ -202,6 +202,11 @@ Ultima actualizacion: 2026-06-01
   - texto sin mencionar fecha simulada
   - banderas en partidos del proximo cierre
   - link a agenda
+- Home y menu principal ajustados:
+  - nav principal marca el item actual, incluyendo rutas hijas y aliases publicos
+  - badge de proximo cierre de partidos renombrado a "Pronosticos de partidos"
+  - proximo cierre fusiona faltantes de partidos/especiales cuando cierran en el mismo horario
+  - lideres de grupo y sorpresa negativa aparecen junto a partidos si cierran al inicio del Mundial
 - Agenda por dia agregada en `/agenda`.
 - Fixture ajustado:
   - titulo de vista cambiado a "Fixture"
@@ -258,6 +263,11 @@ Ultima actualizacion: 2026-06-01
   - `withDbTimeout` aplicado en toda la capa `src/db/queries/*`
   - `src/db/client.ts` endurecido para serverless: singleton guardado en `globalThis` (evita fuga de pools por HMR en dev), `idle_timeout`, `max_lifetime`, `connect_timeout`, `statement_timeout` y `max: 10` (no `max: 1`, porque la home dispara ~14 queries concurrentes ranking+dashboard)
   - pendiente operativo: la DB de prod en Vercel debe estar poblada y no pausada (`npm run sync:football-data`)
+- Cache del ranking (fix de eficiencia y del "a veces no carga el ranking"):
+  - `getRanking`/`getRankingDetail` envueltos en `unstable_cache` (tag `ranking`, `revalidate` 60s)
+  - el ranking se computa una vez por ventana y se sirve de cache (stale-while-revalidate), en vez de traer 7 tablas enteras y re-scorear a todos los usuarios en cada render de la home
+  - reduce el fan-out a la DB por request -> mucha menos exposicion al timeout de conexion rancia que hacia que el ranking no cargara
+  - invalidacion on-demand con `revalidateTag("ranking", "max")` tras sync (cron `/api/cron/sync` y accion de admin) y tras alta/activacion de usuarios
 - Fix de carga de env en scripts tsx (`sync:football-data`, `db:seed*`, `db:reset-dev`):
   - fallaban con `Missing required env var: DATABASE_URL` porque los `import` estaticos (incluido `@/db/client`, que lee el env al cargarse) corren antes del `config({ path: ".env.local" })`
   - `src/lib/load-env.ts` centraliza la carga y se importa primero en cada script para que el env quede listo antes de evaluar cualquier modulo que lo lea

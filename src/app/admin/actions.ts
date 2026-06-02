@@ -1,9 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { syncFootballData } from "@/integrations/football-data/sync";
+import { RANKING_CACHE_TAG } from "@/db/queries/ranking";
 import { setUserActive, updateUserPassword, upsertUser } from "@/db/queries/users";
 
 export type SyncNowState = {
@@ -21,6 +22,7 @@ export async function syncNowAction(state: SyncNowState): Promise<SyncNowState> 
 
   try {
     const result = await syncFootballData("full");
+    revalidateTag(RANKING_CACHE_TAG, "max");
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/fixture");
@@ -67,6 +69,7 @@ export async function saveUserAction(formData: FormData) {
   });
 
   await upsertUser(input);
+  revalidateTag(RANKING_CACHE_TAG, "max");
   revalidatePath("/admin");
   revalidatePath("/ranking");
 }
@@ -94,6 +97,7 @@ export async function setUserActiveAction(formData: FormData) {
   }
 
   await setUserActive(input.username, input.active);
+  revalidateTag(RANKING_CACHE_TAG, "max");
   revalidatePath("/admin");
   revalidatePath("/ranking");
 }

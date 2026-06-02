@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { db } from "@/db/client";
 import { withDbTimeout } from "@/db/with-timeout";
 import {
@@ -60,7 +61,26 @@ export type RankingDetail = RankingRow & {
 
 type RankingData = Awaited<ReturnType<typeof loadRankingData>>;
 
-export async function getRanking(): Promise<RankingRow[]> {
+// The ranking is global (same for every user) and only changes when a sync
+// updates results/standings. Computing it pulls 7 full tables and re-scores
+// every user, so we cache the computed result and serve it from cache instead
+// of hitting the DB on every home/ranking render. revalidate keeps it fresh
+// within a minute (stale-while-revalidate, so nobody ever waits), and the
+// "ranking" tag allows on-demand invalidation right after a sync.
+export const RANKING_CACHE_TAG = "ranking";
+const RANKING_REVALIDATE_SECONDS = 60;
+
+export const getRanking = unstable_cache(computeRanking, ["ranking"], {
+  tags: [RANKING_CACHE_TAG],
+  revalidate: RANKING_REVALIDATE_SECONDS,
+});
+
+export const getRankingDetail = unstable_cache(computeRankingDetail, ["ranking-detail"], {
+  tags: [RANKING_CACHE_TAG],
+  revalidate: RANKING_REVALIDATE_SECONDS,
+});
+
+async function computeRanking(): Promise<RankingRow[]> {
   const users = await getActiveUsers();
   const matchRows = await withDbTimeout(db.select().from(matches), "getRanking.matches");
 
@@ -72,7 +92,7 @@ export async function getRanking(): Promise<RankingRow[]> {
   return rankRows(data.users.map((user) => calculateUserRow(data, user)));
 }
 
-export async function getRankingDetail(username: string): Promise<RankingDetail | null> {
+async function computeRankingDetail(username: string): Promise<RankingDetail | null> {
   const data = await loadRankingData();
   const user = data.users.find((candidate) => candidate.username === username);
 

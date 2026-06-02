@@ -41,7 +41,7 @@ export default async function Home() {
                     <Link
                       className="soft-card-link rounded-md px-3 py-2 text-sm font-semibold text-amber-950"
                       href={item.href}
-                      key={`${item.kind}-${item.href}`}
+                      key={`${item.kind}-${item.href}-${item.label}`}
                     >
                       <MissingItemLabel item={item} />
                     </Link>

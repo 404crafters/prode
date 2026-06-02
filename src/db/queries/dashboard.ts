@@ -17,6 +17,10 @@ import {
 } from "@/domain/deadlines";
 import { getNow } from "@/lib/clock";
 import { formatArgentinaDateTime, getArgentinaDateKey } from "@/lib/date";
+import {
+  getNextDashboardDeadline,
+  type DashboardDeadlineCandidate,
+} from "./dashboard-deadlines";
 
 export type DashboardSummary = {
   nextDeadline: {
@@ -64,7 +68,7 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
   );
 
   const teamsById = new Map(teamRows.map((team) => [team.id, team]));
-  const candidates: { label: string; deadline: Date; missingItems: DashboardSummary["missingItems"] }[] = [];
+  const candidates: DashboardDeadlineCandidate<DashboardSummary["missingItems"][number]>[] = [];
   const predictionsByMatchId = new Set(predictionRows.map((prediction) => prediction.matchId));
   const specialKeys = new Set(
     specialRows.map((prediction) => `${prediction.type}:${prediction.scopeKey}`),
@@ -100,7 +104,7 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
     }
 
     candidates.push({
-      label: "Partidos",
+      label: "Pronosticos de partidos",
       deadline: nextMatchDeadline,
       missingItems,
     });
@@ -134,6 +138,7 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
       label: "Inicio del Mundial",
       deadline: tournamentDeadline,
       missingItems,
+      labelPriority: 1,
     });
   }
 
@@ -158,10 +163,11 @@ export async function getDashboardSummary(username: string): Promise<DashboardSu
       label: "Inicio de eliminatorias",
       deadline: knockoutDeadline,
       missingItems,
+      labelPriority: 1,
     });
   }
 
-  const next = candidates.sort((a, b) => a.deadline.getTime() - b.deadline.getTime())[0];
+  const next = getNextDashboardDeadline(candidates);
   const currentAllIn = allInRows[0] ?? null;
   const currentAllInMatch = currentAllIn
     ? (matchRows.find((match) => match.id === currentAllIn.matchId) ?? null)

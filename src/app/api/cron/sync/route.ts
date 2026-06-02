@@ -1,4 +1,6 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
+import { RANKING_CACHE_TAG } from "@/db/queries/ranking";
 import { syncFootballData } from "@/integrations/football-data/sync";
 
 export async function GET(request: NextRequest) {
@@ -14,6 +16,7 @@ export async function GET(request: NextRequest) {
   }
 
   const result = await syncFootballData("full");
+  revalidateTag(RANKING_CACHE_TAG, "max");
 
   return NextResponse.json({ ok: true, result });
 }
