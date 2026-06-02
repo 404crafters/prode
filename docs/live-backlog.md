@@ -252,6 +252,12 @@ Ultima actualizacion: 2026-06-01
   - `getCurrentUser()` deduplicado por request con `cache()`
   - home deja de consultar `getAdminSummary()` porque ya no muestra esos contadores
   - ranking y dashboard de home se cargan en paralelo
+- Robustez DB en serverless (fix del cuelgue de la home / `FUNCTION_INVOCATION_TIMEOUT` 300s en Vercel):
+  - causa raiz: conexion TCP del pool reusada tras congelamiento de la instancia de Vercel (socket muerto del lado del pooler) o proyecto Supabase pausado -> la query nunca recibe respuesta y cuelga hasta el limite de la funcion; `connect_timeout`/`statement_timeout` no alcanzan porque la query no llega a un backend vivo
+  - `src/db/with-timeout.ts`: `withDbTimeout()` pone un techo duro de 8s a toda operacion de DB y convierte el cuelgue en `DbTimeoutError` visible
+  - `withDbTimeout` aplicado en toda la capa `src/db/queries/*`
+  - `src/db/client.ts` endurecido para serverless: singleton guardado en `globalThis` (evita fuga de pools por HMR en dev), `idle_timeout`, `max_lifetime`, `connect_timeout`, `statement_timeout` y `max: 10` (no `max: 1`, porque la home dispara ~14 queries concurrentes ranking+dashboard)
+  - pendiente operativo: la DB de prod en Vercel debe estar poblada y no pausada (`npm run sync:football-data`)
 
 ## Bloqueado / externo
 

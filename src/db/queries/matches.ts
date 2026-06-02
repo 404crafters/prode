@@ -1,5 +1,6 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
+import { withDbTimeout } from "@/db/with-timeout";
 import { groups, matches, matchPredictions, teams, userAllIns } from "@/db/schema";
 import { getNow } from "@/lib/clock";
 import { formatArgentinaDateTime } from "@/lib/date";
@@ -39,13 +40,16 @@ export type MatchListItem = {
 
 export async function getMatchList(username: string): Promise<MatchListItem[]> {
   const now = getNow();
-  const [matchRows, teamRows, groupRows, predictionRows, allInRows] = await Promise.all([
-    db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.externalFixtureId)),
-    db.select().from(teams),
-    db.select().from(groups),
-    db.select().from(matchPredictions),
-    db.select().from(userAllIns),
-  ]);
+  const [matchRows, teamRows, groupRows, predictionRows, allInRows] = await withDbTimeout(
+    Promise.all([
+      db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.externalFixtureId)),
+      db.select().from(teams),
+      db.select().from(groups),
+      db.select().from(matchPredictions),
+      db.select().from(userAllIns),
+    ]),
+    "getMatchList",
+  );
 
   const teamsById = new Map(teamRows.map((team) => [team.id, team]));
   const groupsById = new Map(groupRows.map((group) => [group.id, group]));

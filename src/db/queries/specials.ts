@@ -1,6 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 import { NEGATIVE_SURPRISE_TEAM_NAMES } from "@/config/game";
 import { db } from "@/db/client";
+import { withDbTimeout } from "@/db/with-timeout";
 import { groupTeams, groups, matches, specialPredictions, standings, teams } from "@/db/schema";
 import { getTournamentStartDeadline, getKnockoutStartDeadline } from "@/domain/deadlines";
 import {
@@ -57,14 +58,17 @@ type TeamOption = { id: string; name: string; flagUrl: string | null };
 
 export async function getSpecialsView(username: string): Promise<SpecialsView> {
   const now = getNow();
-  const [matchRows, groupRows, groupTeamRows, teamRows, predictionRows, standingRows] = await Promise.all([
-    db.select().from(matches).orderBy(asc(matches.kickoffAt)),
-    db.select().from(groups).orderBy(asc(groups.code)),
-    db.select().from(groupTeams),
-    db.select().from(teams).orderBy(asc(teams.name)),
-    db.select().from(specialPredictions).where(eq(specialPredictions.username, username)),
-    db.select().from(standings),
-  ]);
+  const [matchRows, groupRows, groupTeamRows, teamRows, predictionRows, standingRows] = await withDbTimeout(
+    Promise.all([
+      db.select().from(matches).orderBy(asc(matches.kickoffAt)),
+      db.select().from(groups).orderBy(asc(groups.code)),
+      db.select().from(groupTeams),
+      db.select().from(teams).orderBy(asc(teams.name)),
+      db.select().from(specialPredictions).where(eq(specialPredictions.username, username)),
+      db.select().from(standings),
+    ]),
+    "getSpecialsView",
+  );
 
   const tournamentDeadline = getTournamentStartDeadline(matchRows);
   const knockoutDeadline = getKnockoutStartDeadline(matchRows.filter((match) => match.stage !== "group"));

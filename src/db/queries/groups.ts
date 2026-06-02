@@ -1,5 +1,6 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
+import { withDbTimeout } from "@/db/with-timeout";
 import { groupTeams, groups, standings, teams } from "@/db/schema";
 
 export type GroupView = {
@@ -26,12 +27,15 @@ export type GroupView = {
 };
 
 export async function getGroupsView(): Promise<GroupView[]> {
-  const [groupRows, groupTeamRows, teamRows, standingRows] = await Promise.all([
-    db.select().from(groups).orderBy(asc(groups.code)),
-    db.select().from(groupTeams),
-    db.select().from(teams),
-    db.select().from(standings),
-  ]);
+  const [groupRows, groupTeamRows, teamRows, standingRows] = await withDbTimeout(
+    Promise.all([
+      db.select().from(groups).orderBy(asc(groups.code)),
+      db.select().from(groupTeams),
+      db.select().from(teams),
+      db.select().from(standings),
+    ]),
+    "getGroupsView",
+  );
 
   const teamsById = new Map(teamRows.map((team) => [team.id, team]));
   const standingsByGroupTeam = new Map(

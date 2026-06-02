@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
+import { withDbTimeout } from "@/db/with-timeout";
 import { matches, matchPredictions, teams, userAllIns } from "@/db/schema";
 import { areMatchPredictionsVisible, getMatchPredictionDeadline, isMatchPredictionOpen } from "@/domain/deadlines";
 import { getNow } from "@/lib/clock";
@@ -55,18 +56,24 @@ export type MatchDetail = {
 };
 
 export async function getMatchDetail(matchId: string, username: string): Promise<MatchDetail | null> {
-  const [match] = await db.select().from(matches).where(eq(matches.id, matchId)).limit(1);
+  const [match] = await withDbTimeout(
+    db.select().from(matches).where(eq(matches.id, matchId)).limit(1),
+    "getMatchDetail.match",
+  );
 
   if (!match) {
     return null;
   }
 
-  const [teamRows, predictionRows, userRows] = await Promise.all([
-    db.select().from(teams),
-    db.select().from(matchPredictions).where(eq(matchPredictions.matchId, match.id)),
-    getActiveUsers(),
-  ]);
-  const allInRows = await db.select().from(userAllIns);
+  const [teamRows, predictionRows, userRows] = await withDbTimeout(
+    Promise.all([
+      db.select().from(teams),
+      db.select().from(matchPredictions).where(eq(matchPredictions.matchId, match.id)),
+      getActiveUsers(),
+    ]),
+    "getMatchDetail",
+  );
+  const allInRows = await withDbTimeout(db.select().from(userAllIns), "getMatchDetail.allIns");
   const ownAllIn = allInRows.find((row) => row.username === username) ?? null;
 
   const now = getNow();
@@ -75,7 +82,10 @@ export async function getMatchDetail(matchId: string, username: string): Promise
   const ownPrediction = predictionsByUsername.get(username) ?? null;
   const visible = areMatchPredictionsVisible(match, now);
   const currentAllInMatch = ownAllIn
-    ? await db.select().from(matches).where(eq(matches.id, ownAllIn.matchId)).limit(1)
+    ? await withDbTimeout(
+        db.select().from(matches).where(eq(matches.id, ownAllIn.matchId)).limit(1),
+        "getMatchDetail.currentAllIn",
+      )
     : [];
   const currentAllInOpen = currentAllInMatch[0]
     ? isMatchPredictionOpen(currentAllInMatch[0], now)
@@ -157,7 +167,10 @@ export async function getMatchDetail(matchId: string, username: string): Promise
 }
 
 export async function getPredictionMatch(matchId: string) {
-  const [match] = await db.select().from(matches).where(eq(matches.id, matchId)).limit(1);
+  const [match] = await withDbTimeout(
+    db.select().from(matches).where(eq(matches.id, matchId)).limit(1),
+    "getPredictionMatch",
+  );
   return match ?? null;
 }
 

@@ -1,5 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
+import { withDbTimeout } from "@/db/with-timeout";
 import { appUsers } from "@/db/schema";
 import { hashPassword, verifyPassword } from "@/lib/password";
 
@@ -18,18 +19,27 @@ export type AdminUserView = AppUser & {
 };
 
 export async function getUserByUsername(username: string): Promise<AppUser | null> {
-  const [user] = await db.select().from(appUsers).where(eq(appUsers.username, username)).limit(1);
+  const [user] = await withDbTimeout(
+    db.select().from(appUsers).where(eq(appUsers.username, username)).limit(1),
+    "getUserByUsername",
+  );
 
   return user && user.active ? toAppUser(user) : null;
 }
 
 export async function getActiveUsers(): Promise<AppUser[]> {
-  const rows = await db.select().from(appUsers).orderBy(asc(appUsers.displayName));
+  const rows = await withDbTimeout(
+    db.select().from(appUsers).orderBy(asc(appUsers.displayName)),
+    "getActiveUsers",
+  );
   return rows.filter((user) => user.active).map(toAppUser);
 }
 
 export async function getAdminUsers(): Promise<AdminUserView[]> {
-  const rows = await db.select().from(appUsers).orderBy(asc(appUsers.displayName));
+  const rows = await withDbTimeout(
+    db.select().from(appUsers).orderBy(asc(appUsers.displayName)),
+    "getAdminUsers",
+  );
   return rows.map((user) => ({
     ...toAppUser(user),
     createdAt: user.createdAt,
@@ -38,7 +48,10 @@ export async function getAdminUsers(): Promise<AdminUserView[]> {
 }
 
 export async function validateUserPassword(username: string, password: string): Promise<AppUser | null> {
-  const [user] = await db.select().from(appUsers).where(eq(appUsers.username, username)).limit(1);
+  const [user] = await withDbTimeout(
+    db.select().from(appUsers).where(eq(appUsers.username, username)).limit(1),
+    "validateUserPassword",
+  );
 
   if (!user || !user.active) {
     return null;

@@ -1,5 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
+import { withDbTimeout } from "@/db/with-timeout";
 import { groups, matches, teams, userAllIns } from "@/db/schema";
 import { getMatchPredictionDeadline, isMatchPredictionOpen } from "@/domain/deadlines";
 import { getNow } from "@/lib/clock";
@@ -26,12 +27,15 @@ export type AllInView = {
 
 export async function getAllInView(username: string): Promise<AllInView> {
   const now = getNow();
-  const [matchRows, teamRows, groupRows, allInRows] = await Promise.all([
-    db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.externalFixtureId)),
-    db.select().from(teams),
-    db.select().from(groups),
-    db.select().from(userAllIns).where(eq(userAllIns.username, username)),
-  ]);
+  const [matchRows, teamRows, groupRows, allInRows] = await withDbTimeout(
+    Promise.all([
+      db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.externalFixtureId)),
+      db.select().from(teams),
+      db.select().from(groups),
+      db.select().from(userAllIns).where(eq(userAllIns.username, username)),
+    ]),
+    "getAllInView",
+  );
   const teamsById = new Map(teamRows.map((team) => [team.id, team.name]));
   const groupsById = new Map(groupRows.map((group) => [group.id, group]));
   const currentAllIn = allInRows[0] ?? null;

@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
+import { withDbTimeout } from "@/db/with-timeout";
 import {
   groups,
   matches,
@@ -50,14 +51,17 @@ export type DashboardSummary = {
 
 export async function getDashboardSummary(username: string): Promise<DashboardSummary> {
   const now = getNow();
-  const [matchRows, predictionRows, groupRows, specialRows, allInRows, teamRows] = await Promise.all([
-    db.select().from(matches),
-    db.select().from(matchPredictions).where(eq(matchPredictions.username, username)),
-    db.select().from(groups),
-    db.select().from(specialPredictions).where(eq(specialPredictions.username, username)),
-    db.select().from(userAllIns).where(eq(userAllIns.username, username)),
-    db.select().from(teams),
-  ]);
+  const [matchRows, predictionRows, groupRows, specialRows, allInRows, teamRows] = await withDbTimeout(
+    Promise.all([
+      db.select().from(matches),
+      db.select().from(matchPredictions).where(eq(matchPredictions.username, username)),
+      db.select().from(groups),
+      db.select().from(specialPredictions).where(eq(specialPredictions.username, username)),
+      db.select().from(userAllIns).where(eq(userAllIns.username, username)),
+      db.select().from(teams),
+    ]),
+    "getDashboardSummary",
+  );
 
   const teamsById = new Map(teamRows.map((team) => [team.id, team]));
   const candidates: { label: string; deadline: Date; missingItems: DashboardSummary["missingItems"] }[] = [];

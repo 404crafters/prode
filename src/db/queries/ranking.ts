@@ -1,4 +1,5 @@
 import { db } from "@/db/client";
+import { withDbTimeout } from "@/db/with-timeout";
 import {
   matches,
   matchPredictions,
@@ -60,6 +61,13 @@ export type RankingDetail = RankingRow & {
 type RankingData = Awaited<ReturnType<typeof loadRankingData>>;
 
 export async function getRanking(): Promise<RankingRow[]> {
+  const users = await getActiveUsers();
+  const matchRows = await withDbTimeout(db.select().from(matches), "getRanking.matches");
+
+  if (matchRows.length === 0) {
+    return rankRows(users.map(getEmptyRankingRow));
+  }
+
   const data = await loadRankingData();
   return rankRows(data.users.map((user) => calculateUserRow(data, user)));
 }
@@ -87,16 +95,20 @@ export async function getRankingDetail(username: string): Promise<RankingDetail 
 }
 
 async function loadRankingData() {
-  const [users, matchRows, predictionRows, allInRows, specialRows, standingRows, teamRows, groupRows] = await Promise.all([
-    getActiveUsers(),
-    db.select().from(matches),
-    db.select().from(matchPredictions),
-    db.select().from(userAllIns),
-    db.select().from(specialPredictions),
-    db.select().from(standings),
-    db.select().from(teams),
-    db.select().from(groups),
-  ]);
+  const [users, matchRows, predictionRows, allInRows, specialRows, standingRows, teamRows, groupRows] =
+    await withDbTimeout(
+      Promise.all([
+        getActiveUsers(),
+        db.select().from(matches),
+        db.select().from(matchPredictions),
+        db.select().from(userAllIns),
+        db.select().from(specialPredictions),
+        db.select().from(standings),
+        db.select().from(teams),
+        db.select().from(groups),
+      ]),
+      "loadRankingData",
+    );
 
   const teamsById = new Map(teamRows.map((team) => [team.id, team]));
   const groupsById = new Map(groupRows.map((group) => [group.id, group]));
@@ -317,4 +329,19 @@ function rankRows(rows: RankingRow[]): RankingRow[] {
 
     return { ...row, position: lastPosition };
   });
+}
+
+function getEmptyRankingRow(user: AppUser): RankingRow {
+  return {
+    position: 0,
+    username: user.username,
+    displayName: user.displayName,
+    totalPoints: 0,
+    matchPoints: 0,
+    specialPoints: 0,
+    allInBonusPoints: 0,
+    exactCount: 0,
+    fullCount: 0,
+    partialCount: 0,
+  };
 }
