@@ -268,6 +268,9 @@ Ultima actualizacion: 2026-06-02
   - el ranking se computa una vez por ventana y se sirve de cache (stale-while-revalidate), en vez de traer 7 tablas enteras y re-scorear a todos los usuarios en cada render de la home
   - reduce el fan-out a la DB por request -> mucha menos exposicion al timeout de conexion rancia que hacia que el ranking no cargara
   - invalidacion on-demand con `revalidateTag("ranking", "max")` tras sync (cron `/api/cron/sync` y accion de admin) y tras alta/activacion de usuarios
+- Cache de `/grupos` (`getGroupsView`): mismo patron, tag `groups`, `revalidate` 60s, invalidado en sync. Es data global (standings/equipos) y no sensible al tiempo.
+- Eficiencia `getMatchList`: ahora filtra `matchPredictions`/`userAllIns` por `username` en SQL (`where eq`) en vez de traer las tablas enteras y filtrar en JS. Mejora `/fixture` y `/agenda` sin cache.
+- Pendiente (no hecho aun): cache de `/fixture` (`getMatchList`) y `/especiales` (`getSpecialsView`). Son pesadas pero por-usuario y sensibles al tiempo (abierto/cerrado por deadline), asi que cachearlas requiere split de data global (partidos/equipos/grupos/standings, cacheable) vs por-usuario (predicciones, fresca) + invalidacion read-your-own-writes al pronosticar.
 - Fix de carga de env en scripts tsx (`sync:football-data`, `db:seed*`, `db:reset-dev`):
   - fallaban con `Missing required env var: DATABASE_URL` porque los `import` estaticos (incluido `@/db/client`, que lee el env al cargarse) corren antes del `config({ path: ".env.local" })`
   - `src/lib/load-env.ts` centraliza la carga y se importa primero en cada script para que el env quede listo antes de evaluar cualquier modulo que lo lea

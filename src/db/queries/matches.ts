@@ -1,4 +1,4 @@
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { withDbTimeout } from "@/db/with-timeout";
 import { groups, matches, matchPredictions, teams, userAllIns } from "@/db/schema";
@@ -45,8 +45,8 @@ export async function getMatchList(username: string): Promise<MatchListItem[]> {
       db.select().from(matches).orderBy(asc(matches.kickoffAt), asc(matches.externalFixtureId)),
       db.select().from(teams),
       db.select().from(groups),
-      db.select().from(matchPredictions),
-      db.select().from(userAllIns),
+      db.select().from(matchPredictions).where(eq(matchPredictions.username, username)),
+      db.select().from(userAllIns).where(eq(userAllIns.username, username)),
     ]),
     "getMatchList",
   );
@@ -54,11 +54,9 @@ export async function getMatchList(username: string): Promise<MatchListItem[]> {
   const teamsById = new Map(teamRows.map((team) => [team.id, team]));
   const groupsById = new Map(groupRows.map((group) => [group.id, group]));
   const predictionsByMatchId = new Map(
-    predictionRows
-      .filter((prediction) => prediction.username === username)
-      .map((prediction) => [prediction.matchId, prediction]),
+    predictionRows.map((prediction) => [prediction.matchId, prediction]),
   );
-  const allInMatchId = allInRows.find((allIn) => allIn.username === username)?.matchId ?? null;
+  const allInMatchId = allInRows[0]?.matchId ?? null;
 
   return matchRows.map((match) => {
     const prediction = predictionsByMatchId.get(match.id) ?? null;

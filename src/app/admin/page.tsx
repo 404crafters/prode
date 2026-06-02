@@ -29,10 +29,6 @@ export default async function AdminPage() {
           <h2 className="mt-1 text-3xl font-semibold">Admin</h2>
         </div>
 
-        <div className="mt-5">
-          <SyncButton />
-        </div>
-
         {!result.ok ? <div className="mt-5"><SetupWarning error={result.error} /></div> : null}
         {!usersResult.ok ? <div className="mt-5"><SetupWarning error={usersResult.error} /></div> : null}
 

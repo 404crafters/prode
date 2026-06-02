@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { syncFootballData } from "@/integrations/football-data/sync";
+import { GROUPS_CACHE_TAG } from "@/db/queries/groups";
 import { RANKING_CACHE_TAG } from "@/db/queries/ranking";
 import { setUserActive, updateUserPassword, upsertUser } from "@/db/queries/users";
 
@@ -23,6 +24,7 @@ export async function syncNowAction(state: SyncNowState): Promise<SyncNowState> 
   try {
     const result = await syncFootballData("full");
     revalidateTag(RANKING_CACHE_TAG, "max");
+    revalidateTag(GROUPS_CACHE_TAG, "max");
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/fixture");

@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { withDbTimeout } from "@/db/with-timeout";
@@ -26,7 +27,17 @@ export type GroupView = {
   }[];
 };
 
-export async function getGroupsView(): Promise<GroupView[]> {
+// Global tournament data (groups + standings), only changes on sync and is not
+// time-sensitive, so we cache it like the ranking instead of pulling 4 full
+// tables on every /grupos render.
+export const GROUPS_CACHE_TAG = "groups";
+
+export const getGroupsView = unstable_cache(computeGroupsView, ["groups-view"], {
+  tags: [GROUPS_CACHE_TAG],
+  revalidate: 60,
+});
+
+async function computeGroupsView(): Promise<GroupView[]> {
   const [groupRows, groupTeamRows, teamRows, standingRows] = await withDbTimeout(
     Promise.all([
       db.select().from(groups).orderBy(asc(groups.code)),
