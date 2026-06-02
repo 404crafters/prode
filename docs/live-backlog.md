@@ -258,6 +258,9 @@ Ultima actualizacion: 2026-06-01
   - `withDbTimeout` aplicado en toda la capa `src/db/queries/*`
   - `src/db/client.ts` endurecido para serverless: singleton guardado en `globalThis` (evita fuga de pools por HMR en dev), `idle_timeout`, `max_lifetime`, `connect_timeout`, `statement_timeout` y `max: 10` (no `max: 1`, porque la home dispara ~14 queries concurrentes ranking+dashboard)
   - pendiente operativo: la DB de prod en Vercel debe estar poblada y no pausada (`npm run sync:football-data`)
+- Fix de carga de env en scripts tsx (`sync:football-data`, `db:seed*`, `db:reset-dev`):
+  - fallaban con `Missing required env var: DATABASE_URL` porque los `import` estaticos (incluido `@/db/client`, que lee el env al cargarse) corren antes del `config({ path: ".env.local" })`
+  - `src/lib/load-env.ts` centraliza la carga y se importa primero en cada script para que el env quede listo antes de evaluar cualquier modulo que lo lea
 
 ## Bloqueado / externo
 

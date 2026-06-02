@@ -1,7 +1,5 @@
-import { config } from "dotenv";
+import "@/lib/load-env";
 import { syncFootballData } from "./sync";
-
-config({ path: ".env.local" });
 
 syncFootballData("full")
   .then((result) => {

@@ -1,10 +1,8 @@
+import "@/lib/load-env";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-import { config } from "dotenv";
 import postgres from "postgres";
 import { requireEnv } from "@/lib/env";
-
-config({ path: ".env.local" });
 
 if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") {
   console.error("Reset cancelado: no se permite resetear DB en production.");

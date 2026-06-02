@@ -1,4 +1,4 @@
-import { config } from "dotenv";
+import "@/lib/load-env";
 import { closeDbConnection, db } from "@/db/client";
 import {
   groupTeams,
@@ -13,8 +13,6 @@ import {
   type Match,
   type Team,
 } from "@/db/schema";
-
-config({ path: ".env.local", override: true });
 
 const scenarios = [
   "pre-worldcup",
