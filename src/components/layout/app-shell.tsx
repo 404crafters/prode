@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { href: "/grupos", label: "Grupos", activePathPrefixes: ["/groups"] },
   { href: "/especiales", label: "Especiales", activePathPrefixes: ["/specials"] },
   { href: "/ranking", label: "Ranking" },
+  { href: "/reglamento", label: "Reglamento" },
   { href: "/admin", label: "Admin", adminOnly: true },
 ];
 

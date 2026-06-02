@@ -274,6 +274,13 @@ Ultima actualizacion: 2026-06-02
 - Fix de carga de env en scripts tsx (`sync:football-data`, `db:seed*`, `db:reset-dev`):
   - fallaban con `Missing required env var: DATABASE_URL` porque los `import` estaticos (incluido `@/db/client`, que lee el env al cargarse) corren antes del `config({ path: ".env.local" })`
   - `src/lib/load-env.ts` centraliza la carga y se importa primero en cada script para que el env quede listo antes de evaluar cualquier modulo que lo lea
+- Pagina `/reglamento` agregada al menu principal:
+  - explica puntos de partidos, All-In y especiales
+  - documenta cierres por tipo de pronostico
+  - aclara penales en eliminatorias, visibilidad y partidos pendientes
+  - criterios de puntos separados entre fase de grupos y eliminatorias
+  - copy alineado con la etiqueta "Full" usada en la UI
+  - badges de puntos consistentes tambien en especiales, manteniendo textos largos fuera del chip
 
 ## Bloqueado / externo
 
