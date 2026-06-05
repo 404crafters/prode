@@ -1,9 +1,10 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { requireEnv } from "@/lib/env";
+import { getEnv, requireEnv } from "@/lib/env";
 import * as schema from "./schema";
 
 const connectionString = requireEnv("DATABASE_URL");
+const { DATABASE_SSL } = getEnv();
 
 // Reuse a single postgres-js client across HMR reloads in dev. Without this
 // guard every Turbopack hot reload would create a brand new pool whose idle
@@ -18,7 +19,7 @@ const client =
     // The Supabase transaction pooler (Supavisor, port 6543) does not support
     // named prepared statements.
     prepare: false,
-    ssl: "require",
+    ssl: DATABASE_SSL === "require" ? "require" : false,
     // A page can legitimately fan out ~14 queries at once (e.g. the home loads
     // ranking + dashboard concurrently), so the pool needs real headroom or
     // those queries serialize and time out. The transaction pooler handles this

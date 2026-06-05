@@ -4,7 +4,7 @@ Este archivo es el backlog vivo del proyecto. Mantenerlo actualizado cuando se a
 
 ## Estado actual
 
-Ultima actualizacion: 2026-06-02
+Ultima actualizacion: 2026-06-05
 
 ## Hecho
 
@@ -285,6 +285,11 @@ Ultima actualizacion: 2026-06-02
   - lideres de grupo no muestran resultado ni puntos hasta que termine la fase de grupos
   - ranking tampoco puntua lideres de grupo antes de standings completos
   - auditado ranking para confirmar que partidos, All-In, sorpresa negativa y podio no suman antes de tener resultado computable
+- DB self-hosted preparada:
+  - `docker-compose.postgres.yml` dedicado con Postgres prod y dev en puertos no estandar (`5543` y `5544`)
+  - datos persistidos en volumenes separados
+  - `DATABASE_SSL` permite usar `ssl=require` para Supabase o `ssl=disable` para Postgres Docker sin TLS
+  - guia operativa en `docs/self-hosted-postgres.md`
 
 ## Bloqueado / externo
 
@@ -317,9 +322,10 @@ Objetivo: revisar la app con datos reales ya sincronizados en Supabase dev.
 
 Objetivo: preparar DB limpia para produccion.
 
-- Crear proyecto Supabase prod separado del dev.
-- Copiar connection string pooled/transaction para runtime en `DATABASE_URL`.
-- Confirmar connection string directa si Drizzle migrate lo requiere.
+- Levantar Postgres self-hosted en EC2 con `docker-compose.postgres.yml`.
+- Configurar security group/firewall para exponer solo los puertos necesarios (`5543` prod, `5544` dev) desde origenes confiables.
+- Copiar connection string de prod en `DATABASE_URL`.
+- Configurar `DATABASE_SSL=disable` mientras Postgres Docker no tenga TLS.
 - Ejecutar `npm run db:migrate` contra prod con aprobacion explicita.
 - Ejecutar `npm run sync:football-data` contra prod con aprobacion explicita.
 - No correr seeds en prod.

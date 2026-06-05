@@ -1,0 +1,38 @@
+name: prode-postgres
+
+services:
+  postgres-prod:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: prode
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PRODE_PROD_PASSWORD}
+    ports:
+      - "5543:5432"
+    volumes:
+      - prode-postgres-prod-data:/var/lib/postgresql/data
+    networks:
+      - prode-postgres-network
+
+  postgres-dev:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: prode-dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PRODE_DEV_PASSWORD}
+    ports:
+      - "5544:5432"
+    volumes:
+      - prode-postgres-dev-data:/var/lib/postgresql/data
+    networks:
+      - prode-postgres-network
+
+volumes:
+  prode-postgres-prod-data:
+  prode-postgres-dev-data:
+
+networks:
+  prode-postgres-network:
+    name: prode-postgres-network

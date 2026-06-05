@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1).optional(),
+  DATABASE_SSL: z.enum(["require", "disable"]).default("require"),
   SESSION_SECRET: z.string().min(1).optional(),
   CRON_SECRET: z.string().min(1).optional(),
   FOOTBALL_DATA_API_TOKEN: z.string().min(1).optional(),
