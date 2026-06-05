@@ -52,6 +52,7 @@ describe("football-data mapper", () => {
     expect(mapTeamDisplayName("Spain")).toBe("España");
     expect(mapTeamDisplayName("Germany")).toBe("Alemania");
     expect(mapTeamDisplayName("Netherlands")).toBe("Holanda");
+    expect(mapTeamDisplayName("France")).toBe("Francia");
   });
 });
 

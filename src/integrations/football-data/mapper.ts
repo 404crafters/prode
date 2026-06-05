@@ -4,6 +4,7 @@ import type { FootballDataMatch } from "./client";
 const TEAM_NAME_OVERRIDES: Record<string, string> = {
   Brazil: "Brasil",
   England: "Inglaterra",
+  France: "Francia",
   Germany: "Alemania",
   Netherlands: "Holanda",
   Spain: "España",
