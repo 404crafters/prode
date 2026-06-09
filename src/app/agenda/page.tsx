@@ -43,19 +43,53 @@ export default async function AgendaPage() {
                       href={`/fixture/${match.id}`}
                       key={match.id}
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
-                          <TeamLabel flagUrl={match.homeTeamFlagUrl} name={match.homeTeamName ?? "TBD"} />
-                          <span className="text-slate-500">vs</span>
-                          <TeamLabel flagUrl={match.awayTeamFlagUrl} name={match.awayTeamName ?? "TBD"} />
-                        </span>
-                        <span className="rounded-md bg-emerald-400 px-2.5 py-1 text-xs font-bold text-slate-950">
-                          {formatTime(match.kickoffAt)}
-                        </span>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
+                              <TeamLabel flagUrl={match.homeTeamFlagUrl} name={match.homeTeamName ?? "TBD"} />
+                              <span className="text-slate-500">vs</span>
+                              <TeamLabel flagUrl={match.awayTeamFlagUrl} name={match.awayTeamName ?? "TBD"} />
+                            </span>
+                            {match.isAllIn ? (
+                              <span className="pill pill-all-in">
+                                All-In
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                            {match.stage === "group" && match.groupCode ? `Grupo ${match.groupCode}` : getStageLabel(match.stage)}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="rounded-md bg-emerald-400 px-2.5 py-1 text-xs font-bold text-slate-950">
+                            {formatTime(match.kickoffAt)}
+                          </span>
+                          <span
+                            className={
+                              match.isPredictionOpen
+                                ? "pill pill-open"
+                                : "pill pill-closed"
+                            }
+                          >
+                            {match.isPredictionOpen ? "Abierta" : "Cerrada"}
+                          </span>
+                        </div>
                       </div>
-                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        {match.stage === "group" && match.groupCode ? `Grupo ${match.groupCode}` : getStageLabel(match.stage)}
-                      </p>
+                      <div className="mt-3 grid grid-cols-3 gap-2">
+                        <MatchMetric label="Pronostico" value={match.predictionLabel ?? "-"} />
+                        <MatchMetric
+                          label="Resultado"
+                          value={match.homeGoals === null || match.awayGoals === null ? "-" : `${match.homeGoals} - ${match.awayGoals}`}
+                        />
+                        <div className="match-metric">
+                          <span className="match-metric-label">Puntos</span>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                            <PointsChip points={match.points} />
+                            {match.scoreLabel ? <ScoreBadge label={match.scoreLabel} /> : null}
+                          </div>
+                        </div>
+                      </div>
                     </Link>
                   ))}
                 </div>
@@ -125,4 +159,57 @@ function getStageLabel(stage: string) {
   };
 
   return labels[stage] ?? stage;
+}
+
+function MatchMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="match-metric">
+      <span className="match-metric-label">{label}</span>
+      <span className="match-metric-value">{value}</span>
+    </div>
+  );
+}
+
+function PointsChip({ points }: { points: number | null }) {
+  return (
+    <span
+      className={
+        points === null
+          ? "points-chip points-pending"
+          : points > 0
+            ? "points-chip points-positive"
+            : "points-chip points-zero"
+      }
+    >
+      {points === null ? "-" : points}
+    </span>
+  );
+}
+
+function ScoreBadge({ label }: { label: string }) {
+  return <span className={`score-badge ${getScoreBadgeClass(label)}`}>{getScoreBadgeLabel(label)}</span>;
+}
+
+function getScoreBadgeClass(label: string) {
+  if (label === "Exacto") {
+    return "score-exact";
+  }
+
+  if (label === "Signo" || label === "Ganador") {
+    return "score-full";
+  }
+
+  if (label === "Parcial") {
+    return "score-partial";
+  }
+
+  if (label === "Incorrecto" || label === "Sin pronostico") {
+    return "score-miss";
+  }
+
+  return "score-pending";
+}
+
+function getScoreBadgeLabel(label: string) {
+  return label === "Sin pronostico" ? "-" : label;
 }

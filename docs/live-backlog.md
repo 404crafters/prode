@@ -4,7 +4,7 @@ Este archivo es el backlog vivo del proyecto. Mantenerlo actualizado cuando se a
 
 ## Estado actual
 
-Ultima actualizacion: 2026-06-05
+Ultima actualizacion: 2026-06-09
 
 ## Hecho
 
@@ -290,6 +290,9 @@ Ultima actualizacion: 2026-06-05
   - datos persistidos en volumenes separados
   - `DATABASE_SSL` permite usar `ssl=require` para Supabase o `ssl=disable` para Postgres Docker sin TLS
   - guia operativa en `docs/self-hosted-postgres.md`
+- Agenda ajustada:
+  - cada partido muestra pronostico propio, resultado, puntos y tipo de acierto igual que el fixture
+  - cambios de pronostico y All-In revalidan tambien `/agenda`
 
 ## Bloqueado / externo
 

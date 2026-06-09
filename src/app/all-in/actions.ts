@@ -84,6 +84,7 @@ export async function saveAllInAction(
   revalidatePath("/");
   revalidatePath("/all-in");
   revalidatePath("/especiales");
+  revalidatePath("/agenda");
   revalidatePath("/fixture");
   revalidatePath(`/fixture/${targetMatch.id}`);
 
@@ -128,6 +129,7 @@ export async function deleteAllInAction(
   revalidatePath("/");
   revalidatePath("/all-in");
   revalidatePath("/especiales");
+  revalidatePath("/agenda");
   revalidatePath("/fixture");
 
   if (currentMatch) {

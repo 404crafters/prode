@@ -89,6 +89,7 @@ export async function saveMatchPredictionAction(
 
   revalidatePath(`/fixture/${match.id}`);
   revalidatePath("/fixture");
+  revalidatePath("/agenda");
 
   return { success: "Pronostico guardado." };
 }
@@ -105,6 +106,7 @@ export async function setAllInAction(formData: FormData) {
 
   if (!match || !isMatchPredictionOpen(match, getNow())) {
     revalidatePath(`/fixture/${matchId}`);
+    revalidatePath("/agenda");
     return;
   }
 
@@ -123,6 +125,7 @@ export async function setAllInAction(formData: FormData) {
 
     if (currentMatch && !isMatchPredictionOpen(currentMatch, getNow())) {
       revalidatePath(`/fixture/${matchId}`);
+      revalidatePath("/agenda");
       return;
     }
   }
@@ -144,4 +147,5 @@ export async function setAllInAction(formData: FormData) {
 
   revalidatePath(`/fixture/${match.id}`);
   revalidatePath("/fixture");
+  revalidatePath("/agenda");
 }
