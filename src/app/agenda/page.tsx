@@ -8,28 +8,58 @@ import { getNow } from "@/lib/clock";
 
 export const dynamic = "force-dynamic";
 
-export default async function AgendaPage() {
+type AgendaFilter = "upcoming" | "all" | "open" | "closed" | "missing" | "predicted" | "scored";
+
+type AgendaSearchParams = {
+  filter?: string;
+};
+
+export default async function AgendaPage({
+  searchParams,
+}: {
+  searchParams: Promise<AgendaSearchParams>;
+}) {
   const user = await getCurrentUser();
+  const params = await searchParams;
+  const filter = parseFilter(params.filter);
   const result = user
     ? await getAgendaSafely(user.username)
     : { ok: false as const, error: new Error("Sin sesion") };
   const now = getNow();
-  const days = result.ok
-    ? groupByDay(result.value.filter((match) => match.status === "in_progress" || match.kickoffAt.getTime() >= now.getTime()))
-    : [];
+  const visibleMatches = result.ok ? applyFilters(result.value, filter, now) : [];
+  const days = result.ok ? groupByDay(visibleMatches) : [];
 
   return (
     <AppShell>
       <section className="surface rounded-lg p-6">
-        <div>
-          <p className="eyebrow">Calendario</p>
-          <h2 className="mt-1 text-3xl font-semibold">Agenda</h2>
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="eyebrow">Calendario</p>
+            <h2 className="mt-1 text-3xl font-semibold">Agenda</h2>
+          </div>
+          {result.ok ? <p className="pill bg-white text-slate-700">{visibleMatches.length} partidos</p> : null}
         </div>
 
         {!result.ok ? <div className="mt-5"><SetupWarning error={result.error} /></div> : null}
 
         {result.ok ? (
           <div className="mt-6 flex flex-col gap-5">
+            <div className="flex flex-wrap gap-2">
+              {filterLinks.map((item) => (
+                <Link
+                  className={
+                    item.value === filter
+                      ? "rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-sm"
+                      : "rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:border-emerald-300 hover:bg-emerald-50"
+                  }
+                  href={buildAgendaHref(item.value)}
+                  key={item.value}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
             {days.length > 0 ? days.map(([dayKey, matches]) => (
               <section className="soft-card rounded-lg p-4" key={dayKey}>
                 <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
@@ -96,7 +126,7 @@ export default async function AgendaPage() {
               </section>
             )) : (
               <p className="rounded-md bg-slate-950 px-4 py-3 text-sm font-semibold text-slate-200">
-                No quedan partidos por jugar.
+                No hay partidos para este filtro.
               </p>
             )}
           </div>
@@ -105,6 +135,16 @@ export default async function AgendaPage() {
     </AppShell>
   );
 }
+
+const filterLinks: { value: AgendaFilter; label: string }[] = [
+  { value: "upcoming", label: "Proximos" },
+  { value: "missing", label: "Me faltan" },
+  { value: "open", label: "Abiertos" },
+  { value: "predicted", label: "Cargados" },
+  { value: "closed", label: "Cerrados" },
+  { value: "scored", label: "Puntuados" },
+  { value: "all", label: "Todos" },
+];
 
 async function getAgendaSafely(username: string) {
   try {
@@ -128,6 +168,46 @@ function groupByDay(matches: MatchListItem[]) {
   }
 
   return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+}
+
+function parseFilter(value: string | undefined): AgendaFilter {
+  return filterLinks.some((item) => item.value === value) ? (value as AgendaFilter) : "upcoming";
+}
+
+function applyFilters(matches: MatchListItem[], filter: AgendaFilter, now: Date) {
+  if (filter === "upcoming") {
+    return matches.filter((match) => isUpcoming(match, now));
+  }
+
+  if (filter === "missing") {
+    return matches.filter((match) => isUpcoming(match, now) && match.isPredictionOpen && !match.hasPrediction);
+  }
+
+  if (filter === "open") {
+    return matches.filter((match) => match.isPredictionOpen);
+  }
+
+  if (filter === "closed") {
+    return matches.filter((match) => !match.isPredictionOpen);
+  }
+
+  if (filter === "predicted") {
+    return matches.filter((match) => match.hasPrediction);
+  }
+
+  if (filter === "scored") {
+    return matches.filter((match) => match.points !== null);
+  }
+
+  return matches;
+}
+
+function isUpcoming(match: MatchListItem, now: Date) {
+  return match.status === "in_progress" || match.kickoffAt.getTime() >= now.getTime();
+}
+
+function buildAgendaHref(filter: AgendaFilter) {
+  return filter === "upcoming" ? "/agenda" : `/agenda?filter=${filter}`;
 }
 
 function formatDay(date: Date) {

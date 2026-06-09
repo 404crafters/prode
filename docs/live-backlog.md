@@ -293,6 +293,8 @@ Ultima actualizacion: 2026-06-09
 - Agenda ajustada:
   - cada partido muestra pronostico propio, resultado, puntos y tipo de acierto igual que el fixture
   - cambios de pronostico y All-In revalidan tambien `/agenda`
+  - filtros por query string para proximos, faltantes, abiertos, cargados, cerrados, puntuados y todos
+  - filtro default en `/agenda` muestra solo partidos proximos o en curso
 
 ## Bloqueado / externo
 
