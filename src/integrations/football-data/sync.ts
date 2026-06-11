@@ -20,9 +20,11 @@ import {
 } from "./mapper";
 import {
   calculateLocalStandings,
+  extractApiTotalStandings,
   toLocalStandingMatch,
   type LocalStandingRow,
   type LocalStandingTeam,
+  type TeamGroupInfo,
 } from "./standings";
 
 type SyncResult = {
@@ -63,9 +65,19 @@ export async function syncFootballData(type: SyncRunType = "full"): Promise<Sync
     const memberships = extractGroupMemberships(apiMatches.matches);
     const groupIdByCode = await upsertGroupsAndMemberships(memberships, teamIdByExternalId);
     const matchCount = await upsertMatches(apiMatches.matches, teamIdByExternalId, groupIdByCode);
+    const groupByExternalTeamId = buildGroupByExternalTeamId(memberships);
+    // Prefer the provider standings (authoritative and ahead of the lagging
+    // per-match scores): first a per-group feed, then the flat 2026 TOTAL table
+    // mapped back to groups. Only fall back to recomputing from fixtures when
+    // the standings endpoint returns nothing usable.
+    const groupedStandings = extractGroupedStandings(apiStandings, teamIdByExternalId);
+    const apiStandingRows =
+      groupedStandings.length > 0
+        ? groupedStandings
+        : extractApiTotalStandings(apiStandings, teamIdByExternalId, groupByExternalTeamId);
     const standingRows =
-      extractGroupedStandings(apiStandings, teamIdByExternalId).length > 0
-        ? extractGroupedStandings(apiStandings, teamIdByExternalId)
+      apiStandingRows.length > 0
+        ? apiStandingRows
         : calculateLocalStandings(
             toLocalStandingTeams(memberships, teamIdByExternalId),
             apiMatches.matches.map((match) => toLocalStandingMatch(match, teamIdByExternalId)),
@@ -325,6 +337,21 @@ function extractGroupMemberships(apiMatches: FootballDataMatch[]): GroupMembersh
   return [...memberships.values()].sort(
     (a, b) => a.groupCode.localeCompare(b.groupCode) || a.seed - b.seed,
   );
+}
+
+function buildGroupByExternalTeamId(memberships: GroupMembership[]): Map<number, TeamGroupInfo> {
+  const map = new Map<number, TeamGroupInfo>();
+
+  for (const membership of memberships) {
+    if (!map.has(membership.externalTeamId)) {
+      map.set(membership.externalTeamId, {
+        groupCode: membership.groupCode,
+        seed: membership.seed,
+      });
+    }
+  }
+
+  return map;
 }
 
 function toLocalStandingTeams(

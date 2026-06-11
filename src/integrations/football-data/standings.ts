@@ -1,5 +1,10 @@
-import type { FootballDataMatch } from "./client";
+import type { FootballDataMatch, FootballDataStandingsResponse } from "./client";
 import { getGoalsWithoutPenaltyShootout } from "./mapper";
+
+export type TeamGroupInfo = {
+  groupCode: string;
+  seed: number;
+};
 
 export type LocalStandingTeam = {
   groupCode: string;
@@ -107,6 +112,70 @@ export function calculateLocalStandings(
           goalsAgainst: row.goalsAgainst,
           goalDifference: row.goalsFor - row.goalsAgainst,
         })),
+    );
+}
+
+/**
+ * Builds per-group standings from the provider's flat TOTAL standings table.
+ *
+ * The 2026 World Cup feed returns standings as a single 48-team `TOTAL` table
+ * with `group: null` (not split per group like older feeds), so we map each
+ * team to its group via the memberships derived from the fixtures and re-rank
+ * within each group. This uses the authoritative results from the standings
+ * endpoint, which stays ahead of the lagging per-match score data.
+ */
+export function extractApiTotalStandings(
+  apiStandings: FootballDataStandingsResponse,
+  teamIdByExternalId: Map<number, string>,
+  groupByExternalTeamId: Map<number, TeamGroupInfo>,
+): LocalStandingRow[] {
+  const total = apiStandings.standings.find((standing) => standing.type === "TOTAL");
+
+  if (!total) {
+    return [];
+  }
+
+  type SeededRow = LocalStandingRow & { seed: number };
+  const byGroup = new Map<string, SeededRow[]>();
+
+  for (const row of total.table) {
+    const teamId = teamIdByExternalId.get(row.team.id);
+    const group = groupByExternalTeamId.get(row.team.id);
+
+    if (!teamId || !group) {
+      continue;
+    }
+
+    const groupRows = byGroup.get(group.groupCode) ?? [];
+    groupRows.push({
+      groupCode: group.groupCode,
+      teamId,
+      rank: 0,
+      points: row.points,
+      played: row.playedGames,
+      won: row.won,
+      drawn: row.draw,
+      lost: row.lost,
+      goalsFor: row.goalsFor,
+      goalsAgainst: row.goalsAgainst,
+      goalDifference: row.goalDifference,
+      seed: group.seed,
+    });
+    byGroup.set(group.groupCode, groupRows);
+  }
+
+  return [...byGroup.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .flatMap(([, rows]) =>
+      rows
+        .sort(
+          (a, b) =>
+            b.points - a.points ||
+            b.goalDifference - a.goalDifference ||
+            b.goalsFor - a.goalsFor ||
+            a.seed - b.seed,
+        )
+        .map(({ seed: _seed, ...row }, index) => ({ ...row, rank: index + 1 })),
     );
 }
 

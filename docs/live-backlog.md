@@ -4,9 +4,17 @@ Este archivo es el backlog vivo del proyecto. Mantenerlo actualizado cuando se a
 
 ## Estado actual
 
-Ultima actualizacion: 2026-06-09
+Ultima actualizacion: 2026-06-11
 
 ## Hecho
+
+- Fix sync standings (Mundial 2026): el endpoint `/standings` devuelve una unica
+  tabla `TOTAL` plana de 48 equipos con `group: null`. `extractGroupedStandings`
+  exigia `Boolean(standing.group)` y descartaba todo, cayendo al calculo local
+  que depende de los goles de `/matches` (que llegan con retraso/`null`). Se
+  agrego `extractApiTotalStandings`, que mapea la tabla plana a cada grupo via
+  las membresias del fixture y re-rankea por grupo. Cadena de prioridad:
+  feed agrupado -> tabla TOTAL plana -> calculo local. Con tests.
 
 - Definicion funcional del MVP en `docs/functional-spec.md`.
 - Plan tecnico en `docs/technical-plan.md`.
