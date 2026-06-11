@@ -122,6 +122,10 @@ type RequestOptions = {
   retries?: number;
 };
 
+// football-data.org caps the number of ids per /matches request; chunk well
+// under it so a busy matchday never trips the limit.
+const MATCHES_BY_IDS_CHUNK_SIZE = 50;
+
 export class FootballDataClient {
   private readonly baseUrl: string;
   private readonly token: string;
@@ -163,6 +167,32 @@ export class FootballDataClient {
     return this.request<FootballDataStandingsResponse>(`/competitions/${this.competition}/standings`, {
       params: { season: this.season },
     });
+  }
+
+  /**
+   * Fetches individual matches by id. The competition matches list lags by days
+   * (it keeps returning TIMED with a null score long after kickoff), while the
+   * per-match data is kept fresh — so we use this to backfill same-day results.
+   * Ids are chunked to stay within the provider's per-request limit.
+   */
+  async getMatchesByIds(ids: number[]): Promise<FootballDataMatch[]> {
+    const unique = [...new Set(ids)];
+
+    if (unique.length === 0) {
+      return [];
+    }
+
+    const matches: FootballDataMatch[] = [];
+
+    for (let i = 0; i < unique.length; i += MATCHES_BY_IDS_CHUNK_SIZE) {
+      const chunk = unique.slice(i, i + MATCHES_BY_IDS_CHUNK_SIZE);
+      const data = await this.request<{ matches: FootballDataMatch[] }>("/matches", {
+        params: { ids: chunk.join(",") },
+      });
+      matches.push(...(data.matches ?? []));
+    }
+
+    return matches;
   }
 
   private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {

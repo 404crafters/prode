@@ -4,6 +4,7 @@ import {
   mapFootballDataStage,
   mapFootballDataStatus,
   mapTeamDisplayName,
+  selectMatchIdsToRefresh,
 } from "./mapper";
 import type { FootballDataMatch } from "./client";
 
@@ -53,6 +54,30 @@ describe("football-data mapper", () => {
     expect(mapTeamDisplayName("Germany")).toBe("Alemania");
     expect(mapTeamDisplayName("Netherlands")).toBe("Holanda");
     expect(mapTeamDisplayName("France")).toBe("Francia");
+  });
+
+  it("selects only fixtures that kicked off within the trailing window", () => {
+    const now = new Date("2026-06-12T12:00:00Z");
+    const windowMs = 30 * 60 * 60 * 1000; // 30h
+
+    const matches = [
+      { id: 1, utcDate: "2026-06-12T02:00:00Z" }, // today, already played -> in
+      { id: 2, utcDate: "2026-06-11T19:00:00Z" }, // last night -> within 30h -> in
+      { id: 3, utcDate: "2026-06-12T19:00:00Z" }, // later today, not kicked off -> out
+      { id: 4, utcDate: "2026-06-10T19:00:00Z" }, // >30h ago -> out
+    ];
+
+    expect(selectMatchIdsToRefresh(matches, now, windowMs)).toEqual([1, 2]);
+  });
+
+  it("ignores fixtures with an invalid kickoff date", () => {
+    const now = new Date("2026-06-12T12:00:00Z");
+    const matches = [
+      { id: 1, utcDate: "not-a-date" },
+      { id: 2, utcDate: "2026-06-12T06:00:00Z" },
+    ];
+
+    expect(selectMatchIdsToRefresh(matches, now, 30 * 60 * 60 * 1000)).toEqual([2]);
   });
 });
 

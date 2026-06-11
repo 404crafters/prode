@@ -61,6 +61,28 @@ export function mapFootballDataGroupCode(group: string | null): string | null {
   return match?.[1] ?? null;
 }
 
+/**
+ * Picks the fixtures whose results we should re-fetch by id on each sync:
+ * matches that have already kicked off within the trailing window. The window
+ * spans more than a day so results football-data publishes after the Argentina
+ * midnight boundary are still refreshed on the next hourly run.
+ */
+export function selectMatchIdsToRefresh(
+  matches: Pick<FootballDataMatch, "id" | "utcDate">[],
+  now: Date,
+  windowMs: number,
+): number[] {
+  const nowMs = now.getTime();
+  const sinceMs = nowMs - windowMs;
+
+  return matches
+    .filter((match) => {
+      const kickoffMs = new Date(match.utcDate).getTime();
+      return Number.isFinite(kickoffMs) && kickoffMs <= nowMs && kickoffMs >= sinceMs;
+    })
+    .map((match) => match.id);
+}
+
 export function getWinnerExternalTeamId(match: FootballDataMatch): number | null {
   if (match.score.winner === "HOME_TEAM") {
     return match.homeTeam.id;

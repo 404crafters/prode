@@ -10,6 +10,7 @@ import {
   type SyncRunType,
 } from "@/db/schema";
 import { FootballDataClient, type FootballDataMatch, type FootballDataStandingsResponse } from "./client";
+import { getNow } from "@/lib/clock";
 import {
   getGoalsWithoutPenaltyShootout,
   getWinnerExternalTeamId,
@@ -17,6 +18,7 @@ import {
   mapFootballDataStage,
   mapFootballDataStatus,
   mapTeamDisplayName,
+  selectMatchIdsToRefresh,
 } from "./mapper";
 import {
   calculateLocalStandings,
@@ -41,6 +43,11 @@ type GroupMembership = {
   seed: number;
 };
 
+// Re-fetch by id any fixture that kicked off within this trailing window. ~30h
+// comfortably covers the current matchday plus the tail of the previous one, so
+// late-published results are still picked up by the next hourly cron run.
+const RESULT_REFRESH_WINDOW_MS = 30 * 60 * 60 * 1000;
+
 export async function syncFootballData(type: SyncRunType = "full"): Promise<SyncResult> {
   const [run] = await db
     .insert(syncRuns)
@@ -62,9 +69,19 @@ export async function syncFootballData(type: SyncRunType = "full"): Promise<Sync
     ]);
 
     const teamIdByExternalId = await upsertTeams(apiTeams.teams);
-    const memberships = extractGroupMemberships(apiMatches.matches);
+
+    // The competition matches list lags by days, so backfill same-day results
+    // from the fresh per-match endpoint in a single batched request and merge
+    // them over the stale list before persisting anything.
+    const idsToRefresh = selectMatchIdsToRefresh(apiMatches.matches, getNow(), RESULT_REFRESH_WINDOW_MS);
+    const freshById = new Map(
+      (await client.getMatchesByIds(idsToRefresh)).map((match) => [match.id, match]),
+    );
+    const matchesData = apiMatches.matches.map((match) => freshById.get(match.id) ?? match);
+
+    const memberships = extractGroupMemberships(matchesData);
     const groupIdByCode = await upsertGroupsAndMemberships(memberships, teamIdByExternalId);
-    const matchCount = await upsertMatches(apiMatches.matches, teamIdByExternalId, groupIdByCode);
+    const matchCount = await upsertMatches(matchesData, teamIdByExternalId, groupIdByCode);
     const groupByExternalTeamId = buildGroupByExternalTeamId(memberships);
     // Prefer the provider standings (authoritative and ahead of the lagging
     // per-match scores): first a per-group feed, then the flat 2026 TOTAL table
@@ -80,7 +97,7 @@ export async function syncFootballData(type: SyncRunType = "full"): Promise<Sync
         ? apiStandingRows
         : calculateLocalStandings(
             toLocalStandingTeams(memberships, teamIdByExternalId),
-            apiMatches.matches.map((match) => toLocalStandingMatch(match, teamIdByExternalId)),
+            matchesData.map((match) => toLocalStandingMatch(match, teamIdByExternalId)),
           );
     const standingCount = await upsertStandings(standingRows, groupIdByCode);
     const result: SyncResult = {

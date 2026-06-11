@@ -8,6 +8,13 @@ Ultima actualizacion: 2026-06-11
 
 ## Hecho
 
+- Fix sync resultados por partido (Mundial 2026): la lista
+  `/competitions/WC/matches` llega rezagada dias (devuelve `TIMED` con score
+  `null` mucho despues del kickoff), mientras que el endpoint por-id esta
+  fresco. El sync ahora, ademas de la lista, selecciona los partidos que
+  arrancaron en las ultimas ~30h (`selectMatchIdsToRefresh`) y los pide en una
+  sola request en lote (`getMatchesByIds` -> `/matches?ids=...`), mergeando ese
+  score/winner antes del upsert. Pensado para el cron horario. Con tests.
 - Fix sync standings (Mundial 2026): el endpoint `/standings` devuelve una unica
   tabla `TOTAL` plana de 48 equipos con `group: null`. `extractGroupedStandings`
   exigia `Boolean(standing.group)` y descartaba todo, cayendo al calculo local
