@@ -54,6 +54,16 @@ describe("football-data mapper", () => {
     expect(mapTeamDisplayName("Germany")).toBe("Alemania");
     expect(mapTeamDisplayName("Netherlands")).toBe("Holanda");
     expect(mapTeamDisplayName("France")).toBe("Francia");
+    expect(mapTeamDisplayName("Ivory Coast")).toBe("Costa de Marfil");
+    expect(mapTeamDisplayName("South Korea")).toBe("Corea del Sur");
+    expect(mapTeamDisplayName("United States")).toBe("Estados Unidos");
+    expect(mapTeamDisplayName("Croatia")).toBe("Croacia");
+  });
+
+  it("leaves names that are identical in Spanish unchanged", () => {
+    expect(mapTeamDisplayName("Argentina")).toBe("Argentina");
+    expect(mapTeamDisplayName("Uruguay")).toBe("Uruguay");
+    expect(mapTeamDisplayName("Portugal")).toBe("Portugal");
   });
 
   it("selects only fixtures that kicked off within the trailing window", () => {

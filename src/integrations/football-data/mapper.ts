@@ -1,13 +1,48 @@
 import type { MatchStage, MatchStatus } from "@/db/schema";
 import type { FootballDataMatch } from "./client";
 
+// Keys are the English country names as returned by the football-data API.
+// Only countries whose Spanish name differs are listed; the rest fall through
+// unchanged (Argentina, Australia, Austria, Colombia, Ecuador, Ghana, Paraguay,
+// Portugal, Qatar, Senegal, Uruguay, ...).
 const TEAM_NAME_OVERRIDES: Record<string, string> = {
+  Algeria: "Argelia",
+  Belgium: "Bélgica",
+  "Bosnia-Herzegovina": "Bosnia y Herzegovina",
   Brazil: "Brasil",
+  Canada: "Canadá",
+  "Cape Verde Islands": "Cabo Verde",
+  "Congo DR": "RD del Congo",
+  Croatia: "Croacia",
+  Curaçao: "Curazao",
+  Czechia: "Chequia",
+  Egypt: "Egipto",
   England: "Inglaterra",
   France: "Francia",
   Germany: "Alemania",
+  Haiti: "Haití",
+  Iran: "Irán",
+  Iraq: "Irak",
+  "Ivory Coast": "Costa de Marfil",
+  Japan: "Japón",
+  Jordan: "Jordania",
+  Mexico: "México",
+  Morocco: "Marruecos",
   Netherlands: "Holanda",
+  "New Zealand": "Nueva Zelanda",
+  Norway: "Noruega",
+  Panama: "Panamá",
+  "Saudi Arabia": "Arabia Saudita",
+  Scotland: "Escocia",
+  "South Africa": "Sudáfrica",
+  "South Korea": "Corea del Sur",
   Spain: "España",
+  Sweden: "Suecia",
+  Switzerland: "Suiza",
+  Tunisia: "Túnez",
+  Turkey: "Turquía",
+  "United States": "Estados Unidos",
+  Uzbekistan: "Uzbekistán",
 };
 
 export function mapTeamDisplayName(name: string): string {
