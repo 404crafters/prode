@@ -4,10 +4,11 @@ Este archivo es el backlog vivo del proyecto. Mantenerlo actualizado cuando se a
 
 ## Estado actual
 
-Ultima actualizacion: 2026-06-11
+Ultima actualizacion: 2026-06-19
 
 ## Hecho
 
+- Header actualizado con el logo oficial de 404 desde `public/logo_pill_white.png`.
 - Fix sync resultados por partido (Mundial 2026): la lista
   `/competitions/WC/matches` llega rezagada dias (devuelve `TIMED` con score
   `null` mucho despues del kickoff), mientras que el endpoint por-id esta

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { logoutAction } from "@/app/logout/actions";
 import { MainNav, type MainNavItem } from "@/components/layout/main-nav";
 import { getCurrentUser } from "@/lib/auth";
@@ -30,9 +31,13 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-7 px-8 py-8">
         <header className="surface flex items-center justify-between rounded-lg px-5 py-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500 text-lg font-black text-slate-950 shadow-lg shadow-emerald-950/30">
-              404
-            </div>
+            <Image
+              alt="Logo de 404"
+              className="h-14 w-14 rounded-full object-contain shadow-lg shadow-black/30"
+              height={56}
+              src="/logo_pill_white.png"
+              width={56}
+            />
             <div>
               <p className="eyebrow">Mundial 2026</p>
               <h1 className="mt-1 text-2xl font-semibold tracking-normal">Prode de 404</h1>
